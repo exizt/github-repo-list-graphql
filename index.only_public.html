@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>나의 Git Repos</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</head>
+<body>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Repo</th>
+      <th scope="col">아카이빙</th>
+      <th scope="col">Fork</th>
+      <th scope="col">업데이트</th>
+    </tr>
+  </thead>
+  <tbody id="repo-list"></tbody>
+</table>
+</body>
+<script>
+    /**
+     * public 레포만 가져오는 듯 하다. private 은 못 가져오는 듯.음.
+     */
+    async function getRepos() {
+        var index = 1;
+        const headers = {
+            Accept: "application/vnd.github.nightshade-preview+json",
+            Authorization: `Token 2da981669dcfeb7321862a8f5ca3dc983503aa1c`
+        };
+        const url = "https://api.github.com/users/exizt/repos";
+        const response = await fetch(url, {
+            method: "GET",
+            headers: headers
+        });
+        const result = await response.json();
+        //console.log(result);
+        
+        for(var item of result){
+            appendHtml(item)
+        }
+
+        function appendHtml(item){
+            if(item.name.substring(0,7) == "script-") return
+            if(item.name.substring(0,6) == "study-") return
+            if(item.name.substring(0,5) == "fork-") return
+
+            const updated_at = new Date(item.pushed_at).toLocaleString('ko-KR')
+
+            var html = `<tr>
+                <th scope="row">${index}</th>
+                <td>${item.name}</td>
+                <td>${item.archived}</td>
+                <td>${item.fork}</td>
+                <td>${updated_at}</td>
+            </tr>`
+            var el = document.getElementById("repo-list")
+            index++
+            el.innerHTML += html
+        }
+    }
+    getRepos()
+</script>
+</html>

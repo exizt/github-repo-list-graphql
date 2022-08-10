@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>나의 Git Repos</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>-->
+<!-- <script type="module" src="https://cdn.skypack.dev/pin/@octokit/core@v4.0.4-hwgV7PzMcg3O1yYJZjEW/mode=imports/optimized/@octokit/core.js"></script> -->
+<script type="module" src="./dist/app.js"></script>
+</head>
+<body>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Repo</th>
+      <th scope="col">아카이빙</th>
+      <th scope="col">Fork</th>
+      <th scope="col">Last updated</th>
+    </tr>
+  </thead>
+  <tbody id="repo-list"></tbody>
+</table>
+</body>
+</html>
