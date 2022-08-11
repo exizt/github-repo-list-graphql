@@ -1,7 +1,7 @@
 import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./githib-api.js"
-import { AsyncValidate } from "./async-token.js"
+import { AsyncValidate } from "./async-guard.js"
 
 
 const optionSet = {
@@ -11,7 +11,7 @@ const optionSet = {
     }
 }
 
-let searchAsyncValidate = new AsyncValidate()
+let searchAsyncGuard = new AsyncValidate()
 
 document.addEventListener("DOMContentLoaded", ()=> {
     main()
@@ -22,12 +22,12 @@ document.addEventListener("DOMContentLoaded", ()=> {
             throw new Error(err.message)
         })
         
-        search(config, searchAsyncValidate.get())
+        search(config, searchAsyncGuard.get())
 
         // 문자열 입력 시 이벤트
 	    _add_event(optionSet.searchText.selector, 'input', (e)=>{
-            searchAsyncValidate.new()
-            search(config, searchAsyncValidate.get())
+            searchAsyncGuard.new()
+            search(config, searchAsyncGuard.get())
         });
     }
 })
@@ -43,7 +43,7 @@ function _add_change_event(sel:string, event:EventListener){
 }
 
 function search(config: { personal_access_token: any; author: string; }, asyncToken = 0){
-    if(!searchAsyncValidate.validate(asyncToken)) return 
+    if(!searchAsyncGuard.check(asyncToken)) return 
 
     const authToken = config.personal_access_token
     const author:string = config.author
@@ -72,7 +72,7 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     })
 
     console.log(qry)
-    if(!searchAsyncValidate.validate(asyncToken)) return 
+    if(!searchAsyncGuard.check(asyncToken)) return 
     fetchRepoList_GraphQL(authToken, qry, (data:any)=>{
         rewriteHTML_GraphQL_2(data, asyncToken)
     })
@@ -145,7 +145,7 @@ function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
     // append html
     const el = document.querySelector(".gr-output")
     if (el != null){
-        if(!searchAsyncValidate.validate(asyncToken)) return 
+        if(!searchAsyncGuard.check(asyncToken)) return 
         el.innerHTML = outputHtml
     }
 }
