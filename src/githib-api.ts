@@ -5,20 +5,19 @@ import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
  * @param callback 
  */
 export async function fetchMyRepoList(authToken: string, callback: (arg0: any) => void){
-   
-    // https://docs.github.com/en/rest/repos/repos#list-repositories-for-the-authenticated-user
-    // https://github.com/octokit/core.js#readme
-    const octokit = new Octokit({
-        auth: authToken,
-        baseUrl: 'https://api.github.com'
-    })
+  // https://docs.github.com/en/rest/repos/repos#list-repositories-for-the-authenticated-user
+  // https://github.com/octokit/core.js#readme
+  const octokit = new Octokit({
+      auth: authToken,
+      baseUrl: 'https://api.github.com'
+  })
 
-    octokit.request('GET /user/repos', {
-        affiliation: 'owner',
-        per_page: 30
-    })
-    .then(response => response.data)
-    .then(data => callback(data))
+  octokit.request('GET /user/repos', {
+      affiliation: 'owner',
+      per_page: 30
+  })
+  .then(response => response.data)
+  .then(data => callback(data))
 }
 
 
@@ -28,52 +27,52 @@ export async function fetchMyRepoList(authToken: string, callback: (arg0: any) =
  * @param callback 
  */
 export async function fetchRepoList_GraphQL(authToken:string, query:string = 'github', callback: (arg0: any) => void){
-    // https://github.com/octokit/core.js#readme
-    const octokit = new Octokit({
-        auth: authToken,
-        baseUrl: 'https://api.github.com'
-    })
+  // https://github.com/octokit/core.js#readme
+  const octokit = new Octokit({
+    auth: authToken,
+    baseUrl: 'https://api.github.com'
+  })
 
-    let graphQuery = `
-    query Qr($qry: String = "") {
-      search(type: REPOSITORY, first: 10, query: $qry) {
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-        }
-        repositoryCount
-        edges {
-          node {
-            ... on Repository {
-              id
+  let graphQuery = `
+  query Qr($qry: String = "") {
+    search(type: REPOSITORY, first: 10, query: $qry) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      repositoryCount
+      edges {
+        node {
+          ... on Repository {
+            id
+            name
+            createdAt
+            description
+            diskUsage
+            isArchived
+            isDisabled
+            isEmpty
+            isFork
+            isPrivate
+            isLocked
+            pushedAt
+            updatedAt
+            visibility
+            owner {
+              login
+            }
+            licenseInfo {
               name
-              createdAt
-              description
-              diskUsage
-              isArchived
-              isDisabled
-              isEmpty
-              isFork
-              isPrivate
-              isLocked
-              pushedAt
-              updatedAt
-              visibility
-              owner {
-                login
-              }
-              licenseInfo {
-                name
-              }
             }
           }
         }
       }
-    }`
+    }
+  }`
 
-    octokit.graphql(
-        graphQuery,
-        { "qry": query }
-    )
-    .then(callback)
+  octokit.graphql(
+    graphQuery,
+    { "qry": query }
+  )
+  .then(callback)
 }

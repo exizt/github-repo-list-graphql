@@ -17,41 +17,41 @@ export async function fetchRepoList_GraphQL(authToken, query = 'github', callbac
         baseUrl: 'https://api.github.com'
     });
     let graphQuery = `
-    query Qr($qry: String = "") {
-      search(type: REPOSITORY, first: 10, query: $qry) {
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-        }
-        repositoryCount
-        edges {
-          node {
-            ... on Repository {
-              id
+  query Qr($qry: String = "") {
+    search(type: REPOSITORY, first: 10, query: $qry) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+      }
+      repositoryCount
+      edges {
+        node {
+          ... on Repository {
+            id
+            name
+            createdAt
+            description
+            diskUsage
+            isArchived
+            isDisabled
+            isEmpty
+            isFork
+            isPrivate
+            isLocked
+            pushedAt
+            updatedAt
+            visibility
+            owner {
+              login
+            }
+            licenseInfo {
               name
-              createdAt
-              description
-              diskUsage
-              isArchived
-              isDisabled
-              isEmpty
-              isFork
-              isPrivate
-              isLocked
-              pushedAt
-              updatedAt
-              visibility
-              owner {
-                login
-              }
-              licenseInfo {
-                name
-              }
             }
           }
         }
       }
-    }`;
+    }
+  }`;
     octokit.graphql(graphQuery, { "qry": query })
         .then(callback);
 }
