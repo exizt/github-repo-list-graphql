@@ -22,4 +22,6 @@ export class AsyncValidate {
     validate(token:number){
         return this.token == token
     }
+
+    check = (token:number) => this.validate(token)
 }
