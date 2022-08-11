@@ -1,6 +1,17 @@
 import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./githib-api.js"
+import { AsyncValidate } from "./async-token.js"
+
+
+const optionSet = {
+    'searchText' : {
+        selector : '#search',
+        value : ''
+    }
+}
+
+let searchAsyncValidate = new AsyncValidate()
 
 document.addEventListener("DOMContentLoaded", ()=> {
     main()
@@ -10,38 +21,65 @@ document.addEventListener("DOMContentLoaded", ()=> {
             alert(err.message)
             throw new Error(err.message)
         })
-        const token = config.personal_access_token
-        const author:string = config.author
-        // let query = "jquery in:name user:author sort:name-asc"
-
-        let searches = { 
-            'user': author,
-            'sort': 'name-asc'
-        }
-        // archived:true or archived:false
-        // is:public or is:private
-        // language:javascript
-        // sort
-        // 이름순 : 'name-asc' / 'name-desc'
-        // 생성일순 : 'author-date-desc' / 'author-date-asc'
-        // 커밋 순 : 'committer-date-desc' / 'committer-date-asc'
-        // 업데이트일시 순 : 'updated-desc' / 'updated-asc'
-
         
-        let qry = 'sh in:name'
-        Object.entries(searches).forEach(([key, value]) => {
-            qry += " " + key + ":" + value
-        })
+        search(config, searchAsyncValidate.get())
 
-        fetchRepoList_GraphQL(token, qry, rewriteHTML_GraphQL_2)
-
-        // await fetchGithub_GraphQL(rewriteHTML_Graphql)
+        // 문자열 입력 시 이벤트
+	    _add_event(optionSet.searchText.selector, 'input', (e)=>{
+            searchAsyncValidate.new()
+            search(config, searchAsyncValidate.get())
+        });
     }
 })
 
+// 이벤트 리스너 추가
+function _add_event(sel:string, type:string, event:EventListener){
+	document.querySelector(sel)?.addEventListener(type, event);
+}
+
+// change 이벤트 리스너 추가
+function _add_change_event(sel:string, event:EventListener){
+	_add_event(sel, 'change', event)
+}
+
+function search(config: { personal_access_token: any; author: string; }, asyncToken = 0){
+    if(!searchAsyncValidate.validate(asyncToken)) return 
+
+    const authToken = config.personal_access_token
+    const author:string = config.author
+
+    let searches = { 
+        'user': author,
+        'sort': 'name-asc'
+    }
+    // archived:true or archived:false
+    // is:public or is:private
+    // language:javascript
+    // sort
+    // 이름순 : 'name-asc' / 'name-desc'
+    // 생성일순 : 'author-date-desc' / 'author-date-asc'
+    // 커밋 순 : 'committer-date-desc' / 'committer-date-asc'
+    // 업데이트일시 순 : 'updated-desc' / 'updated-asc'
+    let qry = ''
+
+    let searchText = (document.querySelector(optionSet.searchText.selector) as HTMLInputElement).value
+    if(searchText){
+        qry = `${searchText} in:name`
+    }
+
+    Object.entries(searches).forEach(([key, value]) => {
+        qry += " " + key + ":" + value
+    })
+
+    console.log(qry)
+    if(!searchAsyncValidate.validate(asyncToken)) return 
+    fetchRepoList_GraphQL(authToken, qry, (data:any)=>{
+        rewriteHTML_GraphQL_2(data, asyncToken)
+    })
+}
 
 
-function rewriteHTML_GraphQL_2(data:any){
+function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
     let outputHtml = ''
     
     let _data = data.search
@@ -107,6 +145,7 @@ function rewriteHTML_GraphQL_2(data:any){
     // append html
     const el = document.querySelector(".gr-output")
     if (el != null){
+        if(!searchAsyncValidate.validate(asyncToken)) return 
         el.innerHTML = outputHtml
     }
 }

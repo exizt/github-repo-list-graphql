@@ -1,5 +1,13 @@
 import { loadConfig } from "./load-config.js";
 import { fetchRepoList_GraphQL } from "./githib-api.js";
+import { AsyncValidate } from "./async-token.js";
+const optionSet = {
+    'searchText': {
+        selector: '#search',
+        value: ''
+    }
+};
+let searchAsyncValidate = new AsyncValidate();
 document.addEventListener("DOMContentLoaded", () => {
     main();
     async function main() {
@@ -7,20 +15,44 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(err.message);
             throw new Error(err.message);
         });
-        const token = config.personal_access_token;
-        const author = config.author;
-        let searches = {
-            'user': author,
-            'sort': 'name-asc'
-        };
-        let qry = 'sh in:name';
-        Object.entries(searches).forEach(([key, value]) => {
-            qry += " " + key + ":" + value;
+        search(config, searchAsyncValidate.get());
+        _add_event(optionSet.searchText.selector, 'input', (e) => {
+            searchAsyncValidate.new();
+            search(config, searchAsyncValidate.get());
         });
-        fetchRepoList_GraphQL(token, qry, rewriteHTML_GraphQL_2);
     }
 });
-function rewriteHTML_GraphQL_2(data) {
+function _add_event(sel, type, event) {
+    document.querySelector(sel)?.addEventListener(type, event);
+}
+function _add_change_event(sel, event) {
+    _add_event(sel, 'change', event);
+}
+function search(config, asyncToken = 0) {
+    if (!searchAsyncValidate.validate(asyncToken))
+        return;
+    const authToken = config.personal_access_token;
+    const author = config.author;
+    let searches = {
+        'user': author,
+        'sort': 'name-asc'
+    };
+    let qry = '';
+    let searchText = document.querySelector(optionSet.searchText.selector).value;
+    if (searchText) {
+        qry = `${searchText} in:name`;
+    }
+    Object.entries(searches).forEach(([key, value]) => {
+        qry += " " + key + ":" + value;
+    });
+    console.log(qry);
+    if (!searchAsyncValidate.validate(asyncToken))
+        return;
+    fetchRepoList_GraphQL(authToken, qry, (data) => {
+        rewriteHTML_GraphQL_2(data, asyncToken);
+    });
+}
+function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
     let outputHtml = '';
     let _data = data.search;
     let itemList = _data.edges;
@@ -69,6 +101,8 @@ function rewriteHTML_GraphQL_2(data) {
     }
     const el = document.querySelector(".gr-output");
     if (el != null) {
+        if (!searchAsyncValidate.validate(asyncToken))
+            return;
         el.innerHTML = outputHtml;
     }
 }
