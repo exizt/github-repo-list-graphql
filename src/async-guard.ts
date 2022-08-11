@@ -1,7 +1,7 @@
 /**
  * 비동기 호출이 연속적으로 발생했을 때, 최종것만 동작되도록 검증하는 클래스
  */
-export class AsyncValidate {
+export class AsyncGuard {
     token = 0
 
     newToken(){

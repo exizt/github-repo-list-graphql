@@ -1,7 +1,7 @@
 import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./githib-api.js"
-import { AsyncValidate } from "./async-guard.js"
+import { AsyncGuard } from "./async-guard.js"
 
 
 const optionSet = {
@@ -11,7 +11,7 @@ const optionSet = {
     }
 }
 
-let searchAsyncGuard = new AsyncValidate()
+let searchAsyncGuard = new AsyncGuard()
 
 document.addEventListener("DOMContentLoaded", ()=> {
     main()
