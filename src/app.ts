@@ -2,20 +2,26 @@ import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./githib-api.js"
 import { AsyncGuard } from "./async-guard.js"
+import { OptionEventBind } from "./option-event-bind.js"
 
 
 const optionSet = {
-    'searchText' : {
-        selector : '#search',
-        value : ''
-    }
+    'searchText' : '#search',
+    'isPublic' : '#is_public',
+    'isPrivate' : '#is_private',
+    'isArchived' : '#is_archived',
+    'sortNameAsc' : '#sort_nameAsc',
+    'lastUpdate' : '#sort_lastUpdate',
+    'lastCommit' : '#sort_lastCommit',
+    'lastRegister' : '#sort_lastRegister',
+    'register' : '#sort_register',
 }
-
+const optionElement = new OptionEventBind(optionSet)
 let searchAsyncGuard = new AsyncGuard()
 
 document.addEventListener("DOMContentLoaded", ()=> {
     main()
-
+    
     async function main(){
         const config = await loadConfig().catch(err=> {
             alert(err.message)
@@ -24,11 +30,10 @@ document.addEventListener("DOMContentLoaded", ()=> {
         
         search(config, searchAsyncGuard.get())
 
-        // 문자열 입력 시 이벤트
-	    _add_event(optionSet.searchText.selector, 'input', (e)=>{
+        optionElement.bindEventAll((e)=>{
             searchAsyncGuard.new()
             search(config, searchAsyncGuard.get())
-        });
+        })
     }
 })
 
@@ -62,9 +67,30 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     // 업데이트일시 순 : 'updated-desc' / 'updated-asc'
     let qry = ''
 
-    let searchText = (document.querySelector(optionSet.searchText.selector) as HTMLInputElement).value
+    let searchText = (document.querySelector(optionSet.searchText) as HTMLInputElement).value
     if(searchText){
         qry = `${searchText} in:name`
+    }
+
+    let isPublic = (document.querySelector(optionSet.isPublic) as HTMLInputElement).checked
+    if(isPublic){
+        searches['is'] = 'public'
+    }
+
+    let isPrivate = (document.querySelector(optionSet.isPrivate) as HTMLInputElement).checked
+    if(isPrivate){
+        searches['is'] = 'private'
+    }
+
+    if(isPublic && isPrivate){
+        /// 둘 다 체크된 경우는, 해당 조건을 없애면 전부 조회함.
+        // searches['is'] = ''
+        delete searches['is']
+    }
+
+    let isArchived = (document.querySelector(optionSet.isArchived) as HTMLInputElement).checked
+    if(isArchived){
+        searches['archived'] = 'true'
     }
 
     Object.entries(searches).forEach(([key, value]) => {

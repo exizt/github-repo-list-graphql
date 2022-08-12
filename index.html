@@ -3,16 +3,48 @@
 <head>
 <meta charset="utf-8">
 <title>나의 Git Repos</title>
-<!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">-->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>-->
-<!-- <script type="module" src="https://cdn.skypack.dev/pin/@octokit/core@v4.0.4-hwgV7PzMcg3O1yYJZjEW/mode=imports/optimized/@octokit/core.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
 <script type="module" src="./dist/app.js"></script>
 </head>
 <body>
   <div class="container">
     <div class="gr-search">
-      <input id="search" type="text" placeholder="Find a repository...">
+      <div>
+        <input id="search" type="text" placeholder="Find a repository...">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" value="" id="is_public">
+          <label class="form-check-label" for="is_public">
+            Public
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" value="" id="is_private">
+          <label class="form-check-label" for="is_private">
+            Private
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" value="" id="is_archived">
+          <label class="form-check-label" for="is_archived">
+            Archived
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="dropdown">
+          <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            정렬
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" id="sort_nameAsc">이름</a></li>
+            <li><a class="dropdown-item" href="#" id="sort_lastUpdate">최근 업데이트</a></li>
+            <li><a class="dropdown-item" href="#" id="sort_lastCommit">최근 커밋</a></li>
+            <li><a class="dropdown-item" href="#" id="sort_lastRegister">최근 생성한 저장소</a></li>
+            <li><a class="dropdown-item" href="#" id="sort_register">생성된 순서</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
     <hr>
     <div class="gr-output">

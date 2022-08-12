@@ -1,12 +1,19 @@
 import { loadConfig } from "./load-config.js";
 import { fetchRepoList_GraphQL } from "./githib-api.js";
 import { AsyncGuard } from "./async-guard.js";
+import { OptionEventBind } from "./option-event-bind.js";
 const optionSet = {
-    'searchText': {
-        selector: '#search',
-        value: ''
-    }
+    'searchText': '#search',
+    'isPublic': '#is_public',
+    'isPrivate': '#is_private',
+    'isArchived': '#is_archived',
+    'sortNameAsc': '#sort_nameAsc',
+    'lastUpdate': '#sort_lastUpdate',
+    'lastCommit': '#sort_lastCommit',
+    'lastRegister': '#sort_lastRegister',
+    'register': '#sort_register',
 };
+const optionElement = new OptionEventBind(optionSet);
 let searchAsyncGuard = new AsyncGuard();
 document.addEventListener("DOMContentLoaded", () => {
     main();
@@ -15,10 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(err.message);
             throw new Error(err.message);
         });
-        search(config, searchAsyncValidate.get());
-        _add_event(optionSet.searchText.selector, 'input', (e) => {
-            searchAsyncValidate.new();
-            search(config, searchAsyncValidate.get());
+        search(config, searchAsyncGuard.get());
+        optionElement.bindEventAll((e) => {
+            searchAsyncGuard.new();
+            search(config, searchAsyncGuard.get());
         });
     }
 });
@@ -38,9 +45,24 @@ function search(config, asyncToken = 0) {
         'sort': 'name-asc'
     };
     let qry = '';
-    let searchText = document.querySelector(optionSet.searchText.selector).value;
+    let searchText = document.querySelector(optionSet.searchText).value;
     if (searchText) {
         qry = `${searchText} in:name`;
+    }
+    let isPublic = document.querySelector(optionSet.isPublic).checked;
+    if (isPublic) {
+        searches['is'] = 'public';
+    }
+    let isPrivate = document.querySelector(optionSet.isPrivate).checked;
+    if (isPrivate) {
+        searches['is'] = 'private';
+    }
+    if (isPublic && isPrivate) {
+        delete searches['is'];
+    }
+    let isArchived = document.querySelector(optionSet.isArchived).checked;
+    if (isArchived) {
+        searches['archived'] = 'true';
     }
     Object.entries(searches).forEach(([key, value]) => {
         qry += " " + key + ":" + value;
