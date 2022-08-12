@@ -38,6 +38,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         });
+        let viewOptions = document.querySelectorAll('input[name="viewOptions"]');
+        viewOptions.forEach(el => {
+            el?.addEventListener("change", e => {
+                e.preventDefault();
+                let v = e.target.value;
+                let output = document.querySelector(".gr-output");
+                if (v == 'simple') {
+                    output?.classList.add("gr-output-simple");
+                }
+                else {
+                    output?.classList.remove("gr-output-simple");
+                }
+            });
+        });
         optionElement.bindEventAll((e) => {
             e.preventDefault();
             searchAsyncGuard.new();
@@ -60,24 +74,21 @@ function search(config, asyncToken = 0) {
         'user': author,
         'sort': 'updated-desc'
     };
-    let qry = '';
-    let searchText = document.querySelector(optionSet.searchText).value;
+    let query = '';
+    const searchText = getInputElementBySelector(optionSet.searchText).value;
     if (searchText) {
-        qry = `${searchText} in:name`;
+        query = `${searchText} in:name`;
     }
-    let isPublic = document.querySelector(optionSet.isPublic).checked;
-    if (isPublic) {
+    const isPublic = getInputElementBySelector(optionSet.isPublic).checked;
+    const isPrivate = getInputElementBySelector(optionSet.isPrivate).checked;
+    if (isPrivate === false && isPublic === true) {
         searches['is'] = 'public';
     }
-    let isPrivate = document.querySelector(optionSet.isPrivate).checked;
-    if (isPrivate) {
+    else if (isPrivate === true && isPublic === false) {
         searches['is'] = 'private';
     }
-    if (isPublic && isPrivate) {
-        delete searches['is'];
-    }
-    let isArchived = document.querySelector(optionSet.isArchived).checked;
-    if (isArchived) {
+    let onlyArchived = getInputElementBySelector(optionSet.onlyArchived).checked;
+    if (onlyArchived === true) {
         searches['archived'] = 'true';
     }
     let excludeArchived = getInputElementBySelector(optionSet.excludeArchived).checked;
@@ -133,7 +144,7 @@ function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
         }
         let descriptionHtml = '';
         if (item.description) {
-            descriptionHtml = `<small>${item.description}</small>`;
+            descriptionHtml = `<small class="grot-item-desc">${item.description}</small>`;
         }
         let diskUsage = '';
         if (item.diskUsage > 1024) {
@@ -149,10 +160,13 @@ function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
           <h5>${item.name}<small style="margin-left: 10px;">${badges}</small></h5>
           ${descriptionHtml}
         </div>
-        <div>
+        <div class="grot-item-info">
             ${diskUsageHtml}
             ${licenseInfoHtml}
-          <span>${toLocaleDateString(item.pushedAt)}</span>
+          <small>
+            <span>${toLocaleDateString(item.pushedAt)}</span> /
+            <span>(Created) ${toLocaleDateString(item.createdAt)}</span>
+          </small>
         </div>
       </div>
       <hr>
