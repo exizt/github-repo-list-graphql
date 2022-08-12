@@ -48,6 +48,21 @@ document.addEventListener("DOMContentLoaded", ()=> {
                 }
             })
         })
+        // 보기 옵션
+        let viewOptions = document.querySelectorAll('input[name="viewOptions"]')
+        viewOptions.forEach(el => {
+            el?.addEventListener("change", e => {
+                e.preventDefault()
+                let v = (e.target as HTMLInputElement).value
+                let output = document.querySelector(".gr-output")
+                if(v=='simple'){
+                    output?.classList.add("gr-output-simple")
+                } else {
+                    output?.classList.remove("gr-output-simple")
+                }
+            })
+        })
+
 
         /* 옵션과 관련된 엘리먼트들에 search를 호출하는 이벤트 바인딩 */
         optionElement.bindEventAll((e)=>{
@@ -182,7 +197,7 @@ function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
 
         let descriptionHtml = ''
         if(item.description){
-            descriptionHtml = `<small>${item.description}</small>`
+            descriptionHtml = `<small class="grot-item-desc">${item.description}</small>`
         }
 
         let diskUsage = ''
@@ -200,10 +215,13 @@ function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
           <h5>${item.name}<small style="margin-left: 10px;">${badges}</small></h5>
           ${descriptionHtml}
         </div>
-        <div>
+        <div class="grot-item-info">
             ${diskUsageHtml}
             ${licenseInfoHtml}
-          <span>${toLocaleDateString(item.pushedAt)}</span>
+          <small>
+            <span>${toLocaleDateString(item.pushedAt)}</span> /
+            <span>(Created) ${toLocaleDateString(item.createdAt)}</span>
+          </small>
         </div>
       </div>
       <hr>
