@@ -1,13 +1,13 @@
 import { loadConfig } from "./load-config.js";
 import { fetchRepoList_GraphQL } from "./githib-api.js";
-import { AsyncValidate } from "./async-token.js";
+import { AsyncGuard } from "./async-guard.js";
 const optionSet = {
     'searchText': {
         selector: '#search',
         value: ''
     }
 };
-let searchAsyncValidate = new AsyncValidate();
+let searchAsyncGuard = new AsyncGuard();
 document.addEventListener("DOMContentLoaded", () => {
     main();
     async function main() {
@@ -29,7 +29,7 @@ function _add_change_event(sel, event) {
     _add_event(sel, 'change', event);
 }
 function search(config, asyncToken = 0) {
-    if (!searchAsyncValidate.validate(asyncToken))
+    if (!searchAsyncGuard.check(asyncToken))
         return;
     const authToken = config.personal_access_token;
     const author = config.author;
@@ -46,7 +46,7 @@ function search(config, asyncToken = 0) {
         qry += " " + key + ":" + value;
     });
     console.log(qry);
-    if (!searchAsyncValidate.validate(asyncToken))
+    if (!searchAsyncGuard.check(asyncToken))
         return;
     fetchRepoList_GraphQL(authToken, qry, (data) => {
         rewriteHTML_GraphQL_2(data, asyncToken);
@@ -101,7 +101,7 @@ function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
     }
     const el = document.querySelector(".gr-output");
     if (el != null) {
-        if (!searchAsyncValidate.validate(asyncToken))
+        if (!searchAsyncGuard.check(asyncToken))
             return;
         el.innerHTML = outputHtml;
     }
