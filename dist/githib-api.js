@@ -11,17 +11,24 @@ export async function fetchMyRepoList(authToken, callback) {
         .then(response => response.data)
         .then(data => callback(data));
 }
-export async function fetchRepoList_GraphQL(authToken, query = 'github', callback) {
+export async function fetchRepoList_GraphQL(authToken, query = 'github', searchParam = { page: 10, after: "" }, callback) {
     const octokit = new Octokit({
         auth: authToken,
         baseUrl: 'https://api.github.com'
     });
+    let after = null;
+    if (searchParam.after.length > 0) {
+        after = searchParam.after;
+    }
+    const per_page = searchParam.page;
     let graphQuery = `
-  query Qr($qry: String = "") {
-    search(type: REPOSITORY, first: 10, query: $qry) {
+  query Qr($qry: String = "", $page:Int=10, $after:String=null) {
+    search(type: REPOSITORY, first: $page, query: $qry, after:$after) {
       pageInfo {
         hasNextPage
         hasPreviousPage
+        endCursor
+        startCursor
       }
       repositoryCount
       edges {
@@ -52,6 +59,6 @@ export async function fetchRepoList_GraphQL(authToken, query = 'github', callbac
       }
     }
   }`;
-    octokit.graphql(graphQuery, { "qry": query })
+    octokit.graphql(graphQuery, { "qry": query, "page": per_page, "after": after })
         .then(callback);
 }

@@ -115,12 +115,13 @@ function search(config, asyncToken = 0) {
         searches['sort'] = 'updated-desc';
     }
     Object.entries(searches).forEach(([key, value]) => {
-        qry += " " + key + ":" + value;
+        query += " " + key + ":" + value;
     });
-    console.log(qry);
+    console.log(query);
+    const searchParam = { page: 20, after: "" };
     if (!searchAsyncGuard.check(asyncToken))
         return;
-    fetchRepoList_GraphQL(authToken, qry, (data) => {
+    fetchRepoList_GraphQL(authToken, query, searchParam, (data) => {
         rewriteHTML_GraphQL_2(data, asyncToken);
     });
 }
