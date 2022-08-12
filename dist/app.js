@@ -10,6 +10,7 @@ const optionSet = {
     'excludeArchived': '#exclude_archived',
     'sortOption': '#sort_option',
     'sortOptions': 'a[name=sortOption]',
+    'pageOptions': 'input[name=pageOptions]',
 };
 const optionElement = new OptionEventBind(optionSet);
 let searchAsyncGuard = new AsyncGuard();
@@ -114,11 +115,14 @@ function search(config, asyncToken = 0) {
     else {
         searches['sort'] = 'updated-desc';
     }
+    let pageOption = parseInt(getRadioValueByName('pageOptions'));
+    if (pageOption == 0)
+        pageOption = 10;
     Object.entries(searches).forEach(([key, value]) => {
         query += " " + key + ":" + value;
     });
     console.log(query);
-    const searchParam = { page: 20, after: "" };
+    const searchParam = { page: pageOption, after: "" };
     if (!searchAsyncGuard.check(asyncToken))
         return;
     fetchRepoList_GraphQL(authToken, query, searchParam, (data) => {
@@ -207,3 +211,4 @@ function rewriteHTML_Graphql(data) {
 const toLocaleDateString = (value) => new Date(value).toLocaleString('ko-KR');
 const getElementBySelector = (sel) => document.querySelector(sel);
 const getInputElementBySelector = (sel) => getElementBySelector(sel);
+const getRadioValueByName = (name) => getInputElementBySelector(`input[name="${name}"]:checked`)?.value;

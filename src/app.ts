@@ -13,6 +13,7 @@ const optionSet = {
     'excludeArchived' : '#exclude_archived',
     'sortOption': '#sort_option',
     'sortOptions': 'a[name=sortOption]',
+    'pageOptions': 'input[name=pageOptions]',
 }
 const optionElement = new OptionEventBind(optionSet)
 let searchAsyncGuard = new AsyncGuard()
@@ -157,12 +158,16 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
         searches['sort'] = 'updated-desc'
     }
 
+    // 페이징 갯수 옵션
+    let pageOption = parseInt(getRadioValueByName('pageOptions'))
+    if(pageOption == 0) pageOption = 10
+
     Object.entries(searches).forEach(([key, value]) => {
         query += " " + key + ":" + value
     })
 
     console.log(query)
-    const searchParam = { page: 20, after: ""}
+    const searchParam = { page: pageOption, after: ""}
     if(!searchAsyncGuard.check(asyncToken)) return 
     fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
         rewriteHTML_GraphQL_2(data, asyncToken)
@@ -283,3 +288,4 @@ const toLocaleDateString = (value: any) => new Date(value).toLocaleString('ko-KR
 // document.querySelector를 구문을 줄임
 const getElementBySelector = (sel:string) => document.querySelector(sel) as HTMLElement
 const getInputElementBySelector = (sel:string) => getElementBySelector(sel) as HTMLInputElement
+const getRadioValueByName = (name:string) => getInputElementBySelector(`input[name="${name}"]:checked`)?.value
