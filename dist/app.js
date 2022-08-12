@@ -6,12 +6,10 @@ const optionSet = {
     'searchText': '#search',
     'isPublic': '#is_public',
     'isPrivate': '#is_private',
-    'isArchived': '#is_archived',
-    'sortNameAsc': '#sort_nameAsc',
-    'lastUpdate': '#sort_lastUpdate',
-    'lastCommit': '#sort_lastCommit',
-    'lastRegister': '#sort_lastRegister',
-    'register': '#sort_register',
+    'onlyArchived': '#only_archived',
+    'excludeArchived': '#exclude_archived',
+    'sortOption': '#sort_option',
+    'sortOptions': 'a[name=sortOption]',
 };
 const optionElement = new OptionEventBind(optionSet);
 let searchAsyncGuard = new AsyncGuard();
@@ -23,7 +21,25 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error(err.message);
         });
         search(config, searchAsyncGuard.get());
+        _add_change_event(optionSet.onlyArchived, e => {
+            (getInputElementBySelector(optionSet.excludeArchived)).checked = false;
+        });
+        _add_change_event(optionSet.excludeArchived, e => {
+            (getInputElementBySelector(optionSet.onlyArchived)).checked = false;
+        });
+        let sortOptions = document.querySelectorAll('a[name="sortOption"]');
+        sortOptions.forEach(el => {
+            el?.addEventListener("click", e => {
+                e.preventDefault();
+                let v = e.target.getAttribute("data-value");
+                const sort_option = document.querySelector("#sort_option");
+                if (sort_option !== null && v !== null) {
+                    sort_option.value = v;
+                }
+            });
+        });
         optionElement.bindEventAll((e) => {
+            e.preventDefault();
             searchAsyncGuard.new();
             search(config, searchAsyncGuard.get());
         });
@@ -42,7 +58,7 @@ function search(config, asyncToken = 0) {
     const author = config.author;
     let searches = {
         'user': author,
-        'sort': 'name-asc'
+        'sort': 'updated-desc'
     };
     let qry = '';
     let searchText = document.querySelector(optionSet.searchText).value;
@@ -63,6 +79,29 @@ function search(config, asyncToken = 0) {
     let isArchived = document.querySelector(optionSet.isArchived).checked;
     if (isArchived) {
         searches['archived'] = 'true';
+    }
+    let excludeArchived = getInputElementBySelector(optionSet.excludeArchived).checked;
+    if (excludeArchived === true) {
+        searches['archived'] = 'false';
+    }
+    let sortOption = getElementBySelector(optionSet.sortOption).value;
+    if (sortOption === 'nameAsc') {
+        searches['sort'] = 'name-asc';
+    }
+    else if (sortOption === 'lastUpdate') {
+        searches['sort'] = 'updated-desc';
+    }
+    else if (sortOption === 'lastCommit') {
+        searches['sort'] = 'committer-date-desc';
+    }
+    else if (sortOption === 'lastCreated') {
+        searches['sort'] = 'author-date-desc';
+    }
+    else if (sortOption === 'Created') {
+        searches['sort'] = 'author-date';
+    }
+    else {
+        searches['sort'] = 'updated-desc';
     }
     Object.entries(searches).forEach(([key, value]) => {
         qry += " " + key + ":" + value;
@@ -151,3 +190,5 @@ function rewriteHTML_Graphql(data) {
     }
 }
 const toLocaleDateString = (value) => new Date(value).toLocaleString('ko-KR');
+const getElementBySelector = (sel) => document.querySelector(sel);
+const getInputElementBySelector = (sel) => getElementBySelector(sel);

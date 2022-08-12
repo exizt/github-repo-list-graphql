@@ -9,12 +9,10 @@ const optionSet = {
     'searchText' : '#search',
     'isPublic' : '#is_public',
     'isPrivate' : '#is_private',
-    'isArchived' : '#is_archived',
-    'sortNameAsc' : '#sort_nameAsc',
-    'lastUpdate' : '#sort_lastUpdate',
-    'lastCommit' : '#sort_lastCommit',
-    'lastRegister' : '#sort_lastRegister',
-    'register' : '#sort_register',
+    'onlyArchived' : '#only_archived',
+    'excludeArchived' : '#exclude_archived',
+    'sortOption': '#sort_option',
+    'sortOptions': 'a[name=sortOption]',
 }
 const optionElement = new OptionEventBind(optionSet)
 let searchAsyncGuard = new AsyncGuard()
@@ -29,9 +27,34 @@ document.addEventListener("DOMContentLoaded", ()=> {
         })
         
         search(config, searchAsyncGuard.get())
+        
+        /* 엘리먼트 핸들링 관련 */
+        // archived 관련 옵션
+        _add_change_event(optionSet.onlyArchived, e => {
+            (getInputElementBySelector(optionSet.excludeArchived)).checked = false
+        })
+        _add_change_event(optionSet.excludeArchived, e => {
+            (getInputElementBySelector(optionSet.onlyArchived)).checked = false
+        })
+        // 정렬 옵션
+        let sortOptions = document.querySelectorAll('a[name="sortOption"]')
+        sortOptions.forEach(el => {
+            el?.addEventListener("click", e => {
+                e.preventDefault()
+                let v = (e.target as HTMLAnchorElement).getAttribute("data-value")
+                const sort_option = document.querySelector("#sort_option") as HTMLInputElement
+                if(sort_option !== null && v !== null){
+                    sort_option.value = v
+                }
+            })
+        })
 
+        /* 옵션과 관련된 엘리먼트들에 search를 호출하는 이벤트 바인딩 */
         optionElement.bindEventAll((e)=>{
-            searchAsyncGuard.new()
+            e.preventDefault() // 링크 등의 이벤트 방지
+            searchAsyncGuard.new() // 중복 실행 방지
+
+            // 검색 실행
             search(config, searchAsyncGuard.get())
         })
     }
@@ -53,21 +76,22 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     const authToken = config.personal_access_token
     const author:string = config.author
 
-    let searches = { 
+    let searches:any = { 
         'user': author,
-        'sort': 'name-asc'
+        'sort': 'updated-desc'
     }
     // archived:true or archived:false
     // is:public or is:private
     // language:javascript
-    // sort
-    // 이름순 : 'name-asc' / 'name-desc'
-    // 생성일순 : 'author-date-desc' / 'author-date-asc'
-    // 커밋 순 : 'committer-date-desc' / 'committer-date-asc'
-    // 업데이트일시 순 : 'updated-desc' / 'updated-asc'
-    let qry = ''
+    // 정렬
+    // - 이름순 : 'sort:name-asc' / 'sort:name-desc'
+    // - 생성일순 : 'sort:author-date-desc' / 'sort:author-date-asc'
+    // - 커밋 순 : 'sort:committer-date-desc' / 'sort:committer-date-asc'
+    // - 업데이트일시 순 : 'sort:updated-desc' / 'sort:updated-asc'
+    let query = ''
 
-    let searchText = (document.querySelector(optionSet.searchText) as HTMLInputElement).value
+    // 검색어 옵션
+    const searchText = getInputElementBySelector(optionSet.searchText).value
     if(searchText){
         qry = `${searchText} in:name`
     }
@@ -91,6 +115,20 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     let isArchived = (document.querySelector(optionSet.isArchived) as HTMLInputElement).checked
     if(isArchived){
         searches['archived'] = 'true'
+    // 정렬 순서 옵션
+    let sortOption = (getElementBySelector(optionSet.sortOption) as HTMLInputElement).value
+    if(sortOption === 'nameAsc'){
+        searches['sort'] = 'name-asc'
+    } else if(sortOption === 'lastUpdate'){
+        searches['sort'] = 'updated-desc'
+    } else if(sortOption === 'lastCommit'){
+        searches['sort'] = 'committer-date-desc'
+    } else if(sortOption === 'lastCreated'){
+        searches['sort'] = 'author-date-desc'
+    } else if(sortOption === 'Created'){
+        searches['sort'] = 'author-date'
+    } else {
+        searches['sort'] = 'updated-desc'
     }
 
     Object.entries(searches).forEach(([key, value]) => {
@@ -213,4 +251,9 @@ function rewriteHTML_Graphql(data:any){
 }
 
 
+// TZ 날짜/시간 값을 한국 시간대로 변경
 const toLocaleDateString = (value: any) => new Date(value).toLocaleString('ko-KR')
+
+// document.querySelector를 구문을 줄임
+const getElementBySelector = (sel:string) => document.querySelector(sel) as HTMLElement
+const getInputElementBySelector = (sel:string) => getElementBySelector(sel) as HTMLInputElement
