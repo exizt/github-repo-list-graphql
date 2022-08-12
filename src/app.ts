@@ -70,9 +70,18 @@ function _add_change_event(sel:string, event:EventListener){
 	_add_event(sel, 'change', event)
 }
 
+/**
+ * 깃헙에서 저장소 목록을 조회하는 기능
+ * 
+ * @param config 설정값
+ * @param asyncToken 중복 호출을 방지하는 숫자값 토큰
+ * @returns 
+ */
 function search(config: { personal_access_token: any; author: string; }, asyncToken = 0){
+    // 중복 실행 방지
     if(!searchAsyncGuard.check(asyncToken)) return 
 
+    // 설정값
     const authToken = config.personal_access_token
     const author:string = config.author
 
@@ -93,28 +102,30 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     // 검색어 옵션
     const searchText = getInputElementBySelector(optionSet.searchText).value
     if(searchText){
-        qry = `${searchText} in:name`
+        query = `${searchText} in:name`
     }
 
-    let isPublic = (document.querySelector(optionSet.isPublic) as HTMLInputElement).checked
-    if(isPublic){
+    // pubilc, private 검색 옵션
+    const isPublic = getInputElementBySelector(optionSet.isPublic).checked
+    const isPrivate = getInputElementBySelector(optionSet.isPrivate).checked
+    if(isPrivate===false && isPublic===true){
         searches['is'] = 'public'
-    }
-
-    let isPrivate = (document.querySelector(optionSet.isPrivate) as HTMLInputElement).checked
-    if(isPrivate){
+    } else if(isPrivate===true && isPublic===false){
         searches['is'] = 'private'
     }
 
-    if(isPublic && isPrivate){
-        /// 둘 다 체크된 경우는, 해당 조건을 없애면 전부 조회함.
-        // searches['is'] = ''
-        delete searches['is']
+    // archived 검색 옵션
+    // only archived
+    let onlyArchived = getInputElementBySelector(optionSet.onlyArchived).checked
+    if(onlyArchived === true){
+        searches['archived'] = 'true'
+    }
+    // exclude archived
+    let excludeArchived = getInputElementBySelector(optionSet.excludeArchived).checked
+    if(excludeArchived === true){
+        searches['archived'] = 'false'
     }
 
-    let isArchived = (document.querySelector(optionSet.isArchived) as HTMLInputElement).checked
-    if(isArchived){
-        searches['archived'] = 'true'
     // 정렬 순서 옵션
     let sortOption = (getElementBySelector(optionSet.sortOption) as HTMLInputElement).value
     if(sortOption === 'nameAsc'){
@@ -155,10 +166,6 @@ function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
     for(let _item of itemList){
         let item = _item.node
 
-        //if(item.name.substring(0,7) == "script-") continue
-        //if(item.name.substring(0,6) == "study-") continue
-        //if(item.name.substring(0,5) == "fork-") continue
-    
         // const updated_at = new Date(item.pushedAt).toLocaleString('ko-KR')
         let badges = ''
         if(item.isPrivate){
