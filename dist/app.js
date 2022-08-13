@@ -61,12 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-function _add_event(sel, type, event) {
-    document.querySelector(sel)?.addEventListener(type, event);
-}
-function _add_change_event(sel, event) {
-    _add_event(sel, 'change', event);
-}
 function search(config, asyncToken = 0, evTarget = null) {
     if (!searchAsyncGuard.check(asyncToken))
         return;
@@ -104,15 +98,6 @@ function search(config, asyncToken = 0, evTarget = null) {
     else if (sortOption === 'lastUpdate') {
         searches['sort'] = 'updated-desc';
     }
-    else if (sortOption === 'lastCommit') {
-        searches['sort'] = 'committer-date-desc';
-    }
-    else if (sortOption === 'lastCreated') {
-        searches['sort'] = 'author-date-desc';
-    }
-    else if (sortOption === 'Created') {
-        searches['sort'] = 'author-date';
-    }
     else {
         searches['sort'] = 'updated-desc';
     }
@@ -135,15 +120,14 @@ function search(config, asyncToken = 0, evTarget = null) {
     if (!searchAsyncGuard.check(asyncToken))
         return;
     fetchRepoList_GraphQL(authToken, query, searchParam, (data) => {
-        rewriteHTML_GraphQL_2(data, asyncToken);
+        rewriteHTML(data, asyncToken);
     });
 }
-function rewriteHTML_GraphQL_2(_data, asyncToken = 0) {
+function rewriteHTML(_data, asyncToken = 0) {
     let outputHtml = '';
     let data = _data.search;
     let itemList = data.edges;
     let pageInfo = data.pageInfo;
-    let index = 0;
     for (let _item of itemList) {
         let item = _item.node;
         let badges = '';
@@ -186,7 +170,6 @@ function rewriteHTML_GraphQL_2(_data, asyncToken = 0) {
       </div>
       <hr>
       `;
-        index++;
         outputHtml += html;
     }
     const el = document.querySelector(".gr-output");
@@ -202,9 +185,8 @@ function rewriteHTML_GraphQL_2(_data, asyncToken = 0) {
 }
 const Paging = {
     changePagingEl(info) {
-        const has = info.has;
         const element = document.querySelector(info.selector);
-        if (has) {
+        if (info.has) {
             element?.closest('.page-item')?.classList.remove('disabled');
             element?.setAttribute("data-value", info.cursor);
         }
@@ -217,28 +199,12 @@ const Paging = {
         return element?.getAttribute("data-value");
     }
 };
-function rewriteHTML_Graphql(data) {
-    let outputHtml = '';
-    let _data = data.search;
-    let itemList = _data.edges;
-    let index = 0;
-    for (let _item of itemList) {
-        let item = _item.node;
-        const html = `<tr>
-            <th scope="row">${index}</th>
-            <td>${item.name}</td>
-            <td>${item.isArchived}</td>
-            <td>${item.isFork}</td>
-            <td>${toLocaleDateString(item.pushedAt)}</td>
-        </tr>`;
-        index++;
-        outputHtml += html;
-    }
-    const el = document.getElementById("repo-list");
-    if (el != null) {
-        el.innerHTML = outputHtml;
-    }
-}
+const _add_event = (sel, type, event) => {
+    document.querySelector(sel)?.addEventListener(type, event);
+};
+const _add_change_event = (sel, event) => {
+    _add_event(sel, 'change', event);
+};
 const toLocaleDateString = (value) => new Date(value).toLocaleString('ko-KR');
 const getElementBySelector = (sel) => document.querySelector(sel);
 const getInputElementBySelector = (sel) => getElementBySelector(sel);

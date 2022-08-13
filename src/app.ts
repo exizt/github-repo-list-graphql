@@ -64,7 +64,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
             })
         })
 
-
         /* 옵션과 관련된 엘리먼트들에 search를 호출하는 이벤트 바인딩 */
         bindEventAll(optionSelectors, (e)=>{
             e.preventDefault() // 링크 등의 이벤트 방지
@@ -75,16 +74,6 @@ document.addEventListener("DOMContentLoaded", ()=> {
         })
     }
 })
-
-// 이벤트 리스너 추가
-function _add_event(sel:string, type:string, event:EventListener){
-	document.querySelector(sel)?.addEventListener(type, event);
-}
-
-// change 이벤트 리스너 추가
-function _add_change_event(sel:string, event:EventListener){
-	_add_event(sel, 'change', event)
-}
 
 /**
  * 깃헙에서 저장소 목록을 조회하는 기능
@@ -105,23 +94,14 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
         'user': author,
         'sort': 'updated-desc'
     }
-    // archived:true or archived:false
-    // is:public or is:private
-    // language:javascript
-    // 정렬
-    // - 이름순 : 'sort:name-asc' / 'sort:name-desc'
-    // - 생성일순 : 'sort:author-date-desc' / 'sort:author-date-asc'
-    // - 커밋 순 : 'sort:committer-date-desc' / 'sort:committer-date-asc'
-    // - 업데이트일시 순 : 'sort:updated-desc' / 'sort:updated-asc'
     let query = ''
 
-    /* 검색 옵션 */
+    /* ---------- 검색 옵션 --------- */
     // 검색어 옵션
     const searchText = getInputElementBySelector(optionSelectors.searchText).value
     if(searchText){
         query = `${searchText} in:name`
     }
-
     // pubilc, private 검색 옵션
     const isPublic = getInputElementBySelector(optionSelectors.isPublic).checked
     const isPrivate = getInputElementBySelector(optionSelectors.isPrivate).checked
@@ -130,7 +110,6 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     } else if(isPrivate===true && isPublic===false){
         searches['is'] = 'private'
     }
-
     // archived 검색 옵션
     // only archived
     let onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked
@@ -143,18 +122,12 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
         searches['archived'] = 'false'
     }
 
-    // 정렬 순서 옵션
+    /* ---------- 정렬 옵션 --------- */
     let sortOption = (getElementBySelector(optionSelectors.sortOption) as HTMLInputElement).value
     if(sortOption === 'nameAsc'){
         searches['sort'] = 'name-asc'
     } else if(sortOption === 'lastUpdate'){
         searches['sort'] = 'updated-desc'
-    } else if(sortOption === 'lastCommit'){
-        searches['sort'] = 'committer-date-desc'
-    } else if(sortOption === 'lastCreated'){
-        searches['sort'] = 'author-date-desc'
-    } else if(sortOption === 'Created'){
-        searches['sort'] = 'author-date'
     } else {
         searches['sort'] = 'updated-desc'
     }
@@ -183,21 +156,23 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     
     if(!searchAsyncGuard.check(asyncToken)) return 
     fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
-        rewriteHTML_GraphQL_2(data, asyncToken)
+        rewriteHTML(data, asyncToken)
     })
 }
 
-
-function rewriteHTML_GraphQL_2(_data:any, asyncToken = 0){
+/**
+ * 결과를 HTML에 작성
+ * @param _data 
+ * @param asyncToken 
+ */
+function rewriteHTML(_data:any, asyncToken = 0): void{
     let outputHtml = ''
     
     let data = _data.search
     let itemList = data.edges
     let pageInfo = data.pageInfo
 
-
     // for loop
-    let index = 0
     for(let _item of itemList){
         let item = _item.node
 
@@ -246,8 +221,6 @@ function rewriteHTML_GraphQL_2(_data:any, asyncToken = 0){
       </div>
       <hr>
       `
-        index++
-
         outputHtml += html
     }
 
@@ -266,16 +239,17 @@ function rewriteHTML_GraphQL_2(_data:any, asyncToken = 0){
     Paging.changePagingEl({selector:optionSelectors.previousPage, has:hasPreviousPage, cursor:pageInfo.startCursor})
 }
 
-
+/**
+ * 페이징 관련 함수들
+ */
 const Paging = {
     /**
      * 페이징 요소 변경
      * @param info 파라미터 {selector, has, cursor}
      */
     changePagingEl(info:{selector: string, has:boolean, cursor:string}){
-        const has = info.has
         const element = document.querySelector(info.selector)
-        if(has){
+        if(info.has){
             // console.log(`${info.selector} has`)
             element?.closest('.page-item')?.classList.remove('disabled')
             element?.setAttribute("data-value", info.cursor)
@@ -291,41 +265,15 @@ const Paging = {
 }
 
 
-function rewriteHTML_Graphql(data:any){
-    let outputHtml = ''
-    
-    let _data = data.search
-    let itemList = _data.edges
-
-
-    // for
-    let index = 0
-    for(let _item of itemList){
-        let item = _item.node
-
-        //if(item.name.substring(0,7) == "script-") continue
-        //if(item.name.substring(0,6) == "study-") continue
-        //if(item.name.substring(0,5) == "fork-") continue
-    
-        // const updated_at = new Date(item.pushedAt).toLocaleString('ko-KR')
-    
-        const html = `<tr>
-            <th scope="row">${index}</th>
-            <td>${item.name}</td>
-            <td>${item.isArchived}</td>
-            <td>${item.isFork}</td>
-            <td>${toLocaleDateString(item.pushedAt)}</td>
-        </tr>`
-        index++
-
-        outputHtml += html
-    }
-    const el = document.getElementById("repo-list")
-    if (el != null){
-        el.innerHTML = outputHtml
-    }
+// 이벤트 리스너 추가
+const _add_event = (sel:string, type:string, event:EventListener) => {
+	document.querySelector(sel)?.addEventListener(type, event);
 }
 
+// change 이벤트 리스너 추가
+const _add_change_event = (sel:string, event:EventListener) => {
+	_add_event(sel, 'change', event)
+}
 
 // TZ 날짜/시간 값을 한국 시간대로 변경
 const toLocaleDateString = (value: any) => new Date(value).toLocaleString('ko-KR')

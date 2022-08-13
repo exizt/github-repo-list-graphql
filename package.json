@@ -11,9 +11,9 @@
   "author": "exizt",
   "license": "MIT",
   "homepage": "",
-  "main": "lib/index.js",
+  "main": "dist/github-api.js",
   "files": [
-    "lib/"
+    "dist/"
   ],
   "dependencies": {
     "@octokit/core": "^4.0.4"

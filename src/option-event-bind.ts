@@ -21,8 +21,8 @@ function bindEvent(key:string, el:HTMLElement, e:EventListener){
                 _add_event_el(el, 'input', e)
             } else if(type=='hidden') {
                 // 참고. 기본적으로 hidden 타입은 change 이벤트가 발생하지 않는다고 함.
-                // 그래도 혹시 모르므로, hidden 타입인 경우에는 이벤트 발생시키지 않도록 함.
                 // https://stackoverflow.com/a/8965804
+                // 그래도 혹시 모르므로, hidden 타입인 경우에는 이벤트 발생시키지 않도록 함.
                 break
             } else {
                 // 값이 변경된 후 포커스가 벗어날 때 발생되는 이벤트
