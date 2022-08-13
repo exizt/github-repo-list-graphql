@@ -5,24 +5,24 @@
 export class AsyncGuard {
     token = 0
 
-    newToken(){
+    newToken() {
         let newToken = Date.now()
-        
+
         // token 중복 방지 (필요한지는..혹시 모르니..)
         this.token = (this.token == newToken) ? newToken * 10 : newToken
     }
 
     new = () => this.newToken()
 
-    getToken(){
+    getToken() {
         return this.token
     }
 
     get = () => this.getToken()
 
-    validate(token:number){
+    validate(token: number) {
         return this.token == token
     }
 
-    check = (token:number) => this.validate(token)
+    check = (token: number) => this.validate(token)
 }

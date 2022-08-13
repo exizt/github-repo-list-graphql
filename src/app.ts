@@ -5,11 +5,11 @@ import { bindEventAll } from "./option-event-bind.js"
 
 
 const optionSelectors = {
-    'searchText' : '#search',
-    'isPublic' : '#is_public',
-    'isPrivate' : '#is_private',
-    'onlyArchived' : '#only_archived',
-    'excludeArchived' : '#exclude_archived',
+    'searchText': '#search',
+    'isPublic': '#is_public',
+    'isPrivate': '#is_private',
+    'onlyArchived': '#only_archived',
+    'excludeArchived': '#exclude_archived',
     'sortOption': '#sort_option',
     'sortOptions': 'a[name=sortOption]',
     'pageOptions': 'input[name=pageOptions]',
@@ -18,17 +18,17 @@ const optionSelectors = {
 }
 let searchAsyncGuard = new AsyncGuard()
 
-document.addEventListener("DOMContentLoaded", ()=> {
+document.addEventListener("DOMContentLoaded", () => {
     main()
-    
-    async function main(){
-        const config = await loadConfig().catch(err=> {
+
+    async function main() {
+        const config = await loadConfig().catch(err => {
             alert(err.message)
             throw new Error(err.message)
         })
-        
+
         search(config, searchAsyncGuard.get())
-        
+
         /* 엘리먼트 핸들링 관련 */
         // archived 관련 옵션
         _add_change_event(optionSelectors.onlyArchived, e => {
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
                 e.preventDefault()
                 let v = (e.target as HTMLAnchorElement).getAttribute("data-value")
                 const sort_option = document.querySelector("#sort_option") as HTMLInputElement
-                if(sort_option !== null && v !== null){
+                if (sort_option !== null && v !== null) {
                     sort_option.value = v
                 }
             })
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
                 e.preventDefault()
                 let v = (e.target as HTMLInputElement).value
                 let output = document.querySelector(".gr-output")
-                if(v=='simple'){
+                if (v == 'simple') {
                     output?.classList.add("gr-output-simple")
                 } else {
                     output?.classList.remove("gr-output-simple")
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
         })
 
         /* 옵션과 관련된 엘리먼트들에 search를 호출하는 이벤트 바인딩 */
-        bindEventAll(optionSelectors, (e)=>{
+        bindEventAll(optionSelectors, (e) => {
             e.preventDefault() // 링크 등의 이벤트 방지
             searchAsyncGuard.new() // 중복 실행 방지
 
@@ -82,15 +82,15 @@ document.addEventListener("DOMContentLoaded", ()=> {
  * @param asyncToken 중복 호출을 방지하는 숫자값 토큰
  * @returns 
  */
-function search(config: { personal_access_token: any; author: string; }, asyncToken = 0, evTarget:EventTarget|null = null){
+function search(config: { personal_access_token: any; author: string; }, asyncToken = 0, evTarget: EventTarget | null = null) {
     // 중복 실행 방지
-    if(!searchAsyncGuard.check(asyncToken)) return 
+    if (!searchAsyncGuard.check(asyncToken)) return
 
     // 설정값
     const authToken = config.personal_access_token
-    const author:string = config.author
+    const author: string = config.author
 
-    let searches:any = { 
+    let searches: any = {
         'user': author,
         'sort': 'updated-desc'
     }
@@ -99,34 +99,34 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     /* ---------- 검색 옵션 --------- */
     // 검색어 옵션
     const searchText = getInputElementBySelector(optionSelectors.searchText).value
-    if(searchText){
+    if (searchText) {
         query = `${searchText} in:name`
     }
     // pubilc, private 검색 옵션
     const isPublic = getInputElementBySelector(optionSelectors.isPublic).checked
     const isPrivate = getInputElementBySelector(optionSelectors.isPrivate).checked
-    if(isPrivate===false && isPublic===true){
+    if (isPrivate === false && isPublic === true) {
         searches['is'] = 'public'
-    } else if(isPrivate===true && isPublic===false){
+    } else if (isPrivate === true && isPublic === false) {
         searches['is'] = 'private'
     }
     // archived 검색 옵션
     // only archived
     let onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked
-    if(onlyArchived === true){
+    if (onlyArchived === true) {
         searches['archived'] = 'true'
     }
     // exclude archived
     let excludeArchived = getInputElementBySelector(optionSelectors.excludeArchived).checked
-    if(excludeArchived === true){
+    if (excludeArchived === true) {
         searches['archived'] = 'false'
     }
 
     /* ---------- 정렬 옵션 --------- */
     let sortOption = (getElementBySelector(optionSelectors.sortOption) as HTMLInputElement).value
-    if(sortOption === 'nameAsc'){
+    if (sortOption === 'nameAsc') {
         searches['sort'] = 'name-asc'
-    } else if(sortOption === 'lastUpdate'){
+    } else if (sortOption === 'lastUpdate') {
         searches['sort'] = 'updated-desc'
     } else {
         searches['sort'] = 'updated-desc'
@@ -140,22 +140,22 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
 
     // 페이징 갯수 옵션
     let pageOption = parseInt(getRadioValueByName('pageOptions'))
-    if(pageOption == 0) pageOption = 10
+    if (pageOption == 0) pageOption = 10
 
     // 페이징 이벤트 발생 여부
-    const searchParam = { page: pageOption, after: "", before: ""}
-    if(!!evTarget){
-        if((evTarget as HTMLElement).id == 'page_next'){
+    const searchParam = { page: pageOption, after: "", before: "" }
+    if (!!evTarget) {
+        if ((evTarget as HTMLElement).id == 'page_next') {
             searchParam.after = (Paging.getCursorValue(optionSelectors.nextPage)) ?? ''
         }
 
-        if((evTarget as HTMLElement).id == 'page_previous'){
+        if ((evTarget as HTMLElement).id == 'page_previous') {
             searchParam.before = (Paging.getCursorValue(optionSelectors.previousPage)) ?? ''
         }
     }
-    
-    if(!searchAsyncGuard.check(asyncToken)) return 
-    fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
+
+    if (!searchAsyncGuard.check(asyncToken)) return
+    fetchRepoList_GraphQL(authToken, query, searchParam, (data: any) => {
         rewriteHTML(data, asyncToken)
     })
 }
@@ -165,39 +165,39 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
  * @param _data 
  * @param asyncToken 
  */
-function rewriteHTML(_data:any, asyncToken = 0): void{
+function rewriteHTML(_data: any, asyncToken = 0): void {
     let outputHtml = ''
-    
+
     let data = _data.search
     let itemList = data.edges
     let pageInfo = data.pageInfo
 
     // for loop
-    for(let _item of itemList){
+    for (let _item of itemList) {
         let item = _item.node
 
         // const updated_at = new Date(item.pushedAt).toLocaleString('ko-KR')
         let badges = ''
-        if(item.isPrivate){
+        if (item.isPrivate) {
             badges += '<span class="badge rounded-pill text-bg-secondary">private</span>'
         }
-        if(item.isArchived){
+        if (item.isArchived) {
             badges += '<span class="badge rounded-pill text-bg-secondary">archived</span>'
         }
-    
+
         let licenseInfoHtml = ''
-        if(item.licenseInfo && item.licenseInfo.name){
+        if (item.licenseInfo && item.licenseInfo.name) {
             licenseInfoHtml = `<span class="ml-0 mr-3">${item.licenseInfo.name}</span> /`
         }
 
         let descriptionHtml = ''
-        if(item.description){
+        if (item.description) {
             descriptionHtml = `<small class="grot-item-desc">${item.description}</small>`
         }
 
         let diskUsage = ''
-        if(item.diskUsage > 1024){
-            diskUsage = (item.diskUsage*1.0/1024).toFixed(2) + ' MB'
+        if (item.diskUsage > 1024) {
+            diskUsage = (item.diskUsage * 1.0 / 1024).toFixed(2) + ' MB'
         } else {
             diskUsage = item.diskUsage + ' KB'
         }
@@ -226,8 +226,8 @@ function rewriteHTML(_data:any, asyncToken = 0): void{
 
     // append html
     const el = document.querySelector(".gr-output")
-    if (el != null){
-        if(!searchAsyncGuard.check(asyncToken)) return 
+    if (el != null) {
+        if (!searchAsyncGuard.check(asyncToken)) return
         el.innerHTML = outputHtml
     }
 
@@ -235,8 +235,8 @@ function rewriteHTML(_data:any, asyncToken = 0): void{
     // console.log(pageInfo)
     let hasNextPage = pageInfo.hasNextPage
     let hasPreviousPage = pageInfo.hasPreviousPage
-    Paging.changePagingEl({selector:optionSelectors.nextPage, has:hasNextPage, cursor:pageInfo.endCursor})
-    Paging.changePagingEl({selector:optionSelectors.previousPage, has:hasPreviousPage, cursor:pageInfo.startCursor})
+    Paging.changePagingEl({ selector: optionSelectors.nextPage, has: hasNextPage, cursor: pageInfo.endCursor })
+    Paging.changePagingEl({ selector: optionSelectors.previousPage, has: hasPreviousPage, cursor: pageInfo.startCursor })
 }
 
 /**
@@ -247,9 +247,9 @@ const Paging = {
      * 페이징 요소 변경
      * @param info 파라미터 {selector, has, cursor}
      */
-    changePagingEl(info:{selector: string, has:boolean, cursor:string}){
+    changePagingEl(info: { selector: string, has: boolean, cursor: string }) {
         const element = document.querySelector(info.selector)
-        if(info.has){
+        if (info.has) {
             // console.log(`${info.selector} has`)
             element?.closest('.page-item')?.classList.remove('disabled')
             element?.setAttribute("data-value", info.cursor)
@@ -258,27 +258,27 @@ const Paging = {
         }
     },
 
-    getCursorValue(selector: string){
-        let element = document.querySelector(selector) 
+    getCursorValue(selector: string) {
+        let element = document.querySelector(selector)
         return element?.getAttribute("data-value")
     }
 }
 
 
 // 이벤트 리스너 추가
-const _add_event = (sel:string, type:string, event:EventListener) => {
-	document.querySelector(sel)?.addEventListener(type, event);
+const _add_event = (sel: string, type: string, event: EventListener) => {
+    document.querySelector(sel)?.addEventListener(type, event);
 }
 
 // change 이벤트 리스너 추가
-const _add_change_event = (sel:string, event:EventListener) => {
-	_add_event(sel, 'change', event)
+const _add_change_event = (sel: string, event: EventListener) => {
+    _add_event(sel, 'change', event)
 }
 
 // TZ 날짜/시간 값을 한국 시간대로 변경
 const toLocaleDateString = (value: any) => new Date(value).toLocaleString('ko-KR')
 
 // document.querySelector를 구문을 줄임
-const getElementBySelector = (sel:string) => document.querySelector(sel) as HTMLElement
-const getInputElementBySelector = (sel:string) => getElementBySelector(sel) as HTMLInputElement
-const getRadioValueByName = (name:string) => getInputElementBySelector(`input[name="${name}"]:checked`)?.value
+const getElementBySelector = (sel: string) => document.querySelector(sel) as HTMLElement
+const getInputElementBySelector = (sel: string) => getElementBySelector(sel) as HTMLInputElement
+const getRadioValueByName = (name: string) => getInputElementBySelector(`input[name="${name}"]:checked`)?.value

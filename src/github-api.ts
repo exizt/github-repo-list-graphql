@@ -8,7 +8,7 @@ import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 export async function fetchRepoList_GraphQL(
   authToken: string,
   query: string = 'github',
-  searchParam: ISearchParams = { page: 10, after: null, before:null },
+  searchParam: ISearchParams = { page: 10, after: null, before: null },
   callback: (arg0: any) => void
 ) {
   // https://github.com/octokit/core.js#readme
@@ -17,8 +17,8 @@ export async function fetchRepoList_GraphQL(
     baseUrl: 'https://api.github.com'
   })
 
-  let after:string|null = null
-  if(!!searchParam.after && (searchParam.after as string).length > 0){
+  let after: string | null = null
+  if (!!searchParam.after && (searchParam.after as string).length > 0) {
     after = searchParam.after
   }
   const per_page = searchParam.page
@@ -74,7 +74,7 @@ export async function fetchRepoList_GraphQL(
  * API 통신으로 특정 유저의 github의 저장소 목록을 조회하기.
  * @param callback 
  */
- export async function fetchMyRepoList(authToken: string, callback: (arg0: any) => void) {
+export async function fetchMyRepoList(authToken: string, callback: (arg0: any) => void) {
   // https://docs.github.com/en/rest/repos/repos#list-repositories-for-the-authenticated-user
   // https://github.com/octokit/core.js#readme
   const octokit = new Octokit({
@@ -93,7 +93,7 @@ export async function fetchRepoList_GraphQL(
 
 
 interface ISearchParams {
-  page: number, 
-  after:string|null, 
-  before:string|null
+  page: number,
+  after: string | null,
+  before: string | null
 }
