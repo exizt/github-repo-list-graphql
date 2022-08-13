@@ -1,6 +1,5 @@
-// import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
-import { fetchRepoList_GraphQL } from "./githib-api.js"
+import { fetchRepoList_GraphQL } from "./github-api.js"
 import { AsyncGuard } from "./async-guard.js"
 import { OptionEventBind } from "./option-event-bind.js"
 
