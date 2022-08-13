@@ -1,16 +1,4 @@
 import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
-export async function fetchMyRepoList(authToken, callback) {
-    const octokit = new Octokit({
-        auth: authToken,
-        baseUrl: 'https://api.github.com'
-    });
-    octokit.request('GET /user/repos', {
-        affiliation: 'owner',
-        per_page: 30
-    })
-        .then(response => response.data)
-        .then(data => callback(data));
-}
 export async function fetchRepoList_GraphQL(authToken, query = 'github', searchParam = { page: 10, after: null, before: null }, callback) {
     const octokit = new Octokit({
         auth: authToken,
@@ -61,4 +49,16 @@ export async function fetchRepoList_GraphQL(authToken, query = 'github', searchP
   }`;
     octokit.graphql(graphQuery, { "qry": query, "page": per_page, "after": after })
         .then(callback);
+}
+export async function fetchMyRepoList(authToken, callback) {
+    const octokit = new Octokit({
+        auth: authToken,
+        baseUrl: 'https://api.github.com'
+    });
+    octokit.request('GET /user/repos', {
+        affiliation: 'owner',
+        per_page: 30
+    })
+        .then(response => response.data)
+        .then(data => callback(data));
 }

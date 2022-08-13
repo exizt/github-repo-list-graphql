@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "npm run tsc",
+    "build": "npm run build-ts",
     "build-ts": "tsc",
     "build-app": "npx webpack --mode production",
     "build-app-dev": "npx webpack --mode development"

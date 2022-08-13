@@ -3,10 +3,29 @@
 자신의 깃헙 저장소 목록을 조회하는 기능의 js
 
 # 사용법
-
+## 셋팅
 1. `config.sample.json`을 복사해서 `config.json`파일을 생성
 2. `personal_access_token`을 발행해서 입력해주고, `author`에는 자신의 아이디를 입력
 3. `index.html`을 실행하면 목록을 조회해 볼 수 있음.
+
+## 다른 곳에서 사용시
+
+(핵심 코드)
+```javascript
+let authToken = ''
+let query = 'user:username sort:name-asc'
+let searchParam = { page: 10, after: "", before: ""}
+
+fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
+    let data = _data.search
+    let itemList = data.edges
+    let pageInfo = data.pageInfo
+    for(let _item of itemList){
+        let item = _item.node
+        console.log(item.name)
+    }
+})
+```
 
 
 # 특징 및 목적
