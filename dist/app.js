@@ -11,6 +11,8 @@ const optionSet = {
     'sortOption': '#sort_option',
     'sortOptions': 'a[name=sortOption]',
     'pageOptions': 'input[name=pageOptions]',
+    'nextPage': '#page_next',
+    'previousPage': '#page_previous'
 };
 const optionElement = new OptionEventBind(optionSet);
 let searchAsyncGuard = new AsyncGuard();
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         optionElement.bindEventAll((e) => {
             e.preventDefault();
             searchAsyncGuard.new();
-            search(config, searchAsyncGuard.get());
+            search(config, searchAsyncGuard.get(), e.target);
         });
     }
 });
@@ -66,7 +68,7 @@ function _add_event(sel, type, event) {
 function _add_change_event(sel, event) {
     _add_event(sel, 'change', event);
 }
-function search(config, asyncToken = 0) {
+function search(config, asyncToken = 0, evTarget = null) {
     if (!searchAsyncGuard.check(asyncToken))
         return;
     const authToken = config.personal_access_token;
@@ -115,24 +117,33 @@ function search(config, asyncToken = 0) {
     else {
         searches['sort'] = 'updated-desc';
     }
-    let pageOption = parseInt(getRadioValueByName('pageOptions'));
-    if (pageOption == 0)
-        pageOption = 10;
     Object.entries(searches).forEach(([key, value]) => {
         query += " " + key + ":" + value;
     });
     console.log(query);
-    const searchParam = { page: pageOption, after: "" };
+    let pageOption = parseInt(getRadioValueByName('pageOptions'));
+    if (pageOption == 0)
+        pageOption = 10;
+    const searchParam = { page: pageOption, after: "", before: "" };
+    if (!!evTarget) {
+        if (evTarget.id == 'page_next') {
+            searchParam.after = (Paging.getCursorValue(optionSet.nextPage)) ?? '';
+        }
+        if (evTarget.id == 'page_previous') {
+            searchParam.before = (Paging.getCursorValue(optionSet.previousPage)) ?? '';
+        }
+    }
     if (!searchAsyncGuard.check(asyncToken))
         return;
     fetchRepoList_GraphQL(authToken, query, searchParam, (data) => {
         rewriteHTML_GraphQL_2(data, asyncToken);
     });
 }
-function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
+function rewriteHTML_GraphQL_2(_data, asyncToken = 0) {
     let outputHtml = '';
-    let _data = data.search;
-    let itemList = _data.edges;
+    let data = _data.search;
+    let itemList = data.edges;
+    let pageInfo = data.pageInfo;
     let index = 0;
     for (let _item of itemList) {
         let item = _item.node;
@@ -185,7 +196,28 @@ function rewriteHTML_GraphQL_2(data, asyncToken = 0) {
             return;
         el.innerHTML = outputHtml;
     }
+    let hasNextPage = pageInfo.hasNextPage;
+    let hasPreviousPage = pageInfo.hasPreviousPage;
+    Paging.changePagingEl({ selector: optionSet.nextPage, has: hasNextPage, cursor: pageInfo.endCursor });
+    Paging.changePagingEl({ selector: optionSet.previousPage, has: hasPreviousPage, cursor: pageInfo.startCursor });
 }
+const Paging = {
+    changePagingEl(info) {
+        const has = info.has;
+        const element = document.querySelector(info.selector);
+        if (has) {
+            element?.closest('.page-item')?.classList.remove('disabled');
+            element?.setAttribute("data-value", info.cursor);
+        }
+        else {
+            element?.closest('.page-item')?.classList.add('disabled');
+        }
+    },
+    getCursorValue(selector) {
+        let element = document.querySelector(selector);
+        return element?.getAttribute("data-value");
+    }
+};
 function rewriteHTML_Graphql(data) {
     let outputHtml = '';
     let _data = data.search;

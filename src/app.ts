@@ -1,4 +1,4 @@
-import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
+// import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./githib-api.js"
 import { AsyncGuard } from "./async-guard.js"
@@ -14,6 +14,8 @@ const optionSet = {
     'sortOption': '#sort_option',
     'sortOptions': 'a[name=sortOption]',
     'pageOptions': 'input[name=pageOptions]',
+    'nextPage': '#page_next',
+    'previousPage': '#page_previous'
 }
 const optionElement = new OptionEventBind(optionSet)
 let searchAsyncGuard = new AsyncGuard()
@@ -71,7 +73,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
             searchAsyncGuard.new() // 중복 실행 방지
 
             // 검색 실행
-            search(config, searchAsyncGuard.get())
+            search(config, searchAsyncGuard.get(), e.target)
         })
     }
 })
@@ -93,7 +95,7 @@ function _add_change_event(sel:string, event:EventListener){
  * @param asyncToken 중복 호출을 방지하는 숫자값 토큰
  * @returns 
  */
-function search(config: { personal_access_token: any; author: string; }, asyncToken = 0){
+function search(config: { personal_access_token: any; author: string; }, asyncToken = 0, evTarget:EventTarget|null = null){
     // 중복 실행 방지
     if(!searchAsyncGuard.check(asyncToken)) return 
 
@@ -115,6 +117,7 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     // - 업데이트일시 순 : 'sort:updated-desc' / 'sort:updated-asc'
     let query = ''
 
+    /* 검색 옵션 */
     // 검색어 옵션
     const searchText = getInputElementBySelector(optionSet.searchText).value
     if(searchText){
@@ -158,16 +161,28 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
         searches['sort'] = 'updated-desc'
     }
 
+    // 검색 쿼리 생성
+    Object.entries(searches).forEach(([key, value]) => {
+        query += " " + key + ":" + value
+    })
+    console.log(query)
+
     // 페이징 갯수 옵션
     let pageOption = parseInt(getRadioValueByName('pageOptions'))
     if(pageOption == 0) pageOption = 10
 
-    Object.entries(searches).forEach(([key, value]) => {
-        query += " " + key + ":" + value
-    })
+    // 페이징 이벤트 발생 여부
+    const searchParam = { page: pageOption, after: "", before: ""}
+    if(!!evTarget){
+        if((evTarget as HTMLElement).id == 'page_next'){
+            searchParam.after = (Paging.getCursorValue(optionSet.nextPage)) ?? ''
+        }
 
-    console.log(query)
-    const searchParam = { page: pageOption, after: ""}
+        if((evTarget as HTMLElement).id == 'page_previous'){
+            searchParam.before = (Paging.getCursorValue(optionSet.previousPage)) ?? ''
+        }
+    }
+    
     if(!searchAsyncGuard.check(asyncToken)) return 
     fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
         rewriteHTML_GraphQL_2(data, asyncToken)
@@ -175,11 +190,12 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
 }
 
 
-function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
+function rewriteHTML_GraphQL_2(_data:any, asyncToken = 0){
     let outputHtml = ''
     
-    let _data = data.search
-    let itemList = _data.edges
+    let data = _data.search
+    let itemList = data.edges
+    let pageInfo = data.pageInfo
 
 
     // for loop
@@ -242,6 +258,37 @@ function rewriteHTML_GraphQL_2(data:any, asyncToken = 0){
     if (el != null){
         if(!searchAsyncGuard.check(asyncToken)) return 
         el.innerHTML = outputHtml
+    }
+
+    // 페이징 준비
+    // console.log(pageInfo)
+    let hasNextPage = pageInfo.hasNextPage
+    let hasPreviousPage = pageInfo.hasPreviousPage
+    Paging.changePagingEl({selector:optionSet.nextPage, has:hasNextPage, cursor:pageInfo.endCursor})
+    Paging.changePagingEl({selector:optionSet.previousPage, has:hasPreviousPage, cursor:pageInfo.startCursor})
+}
+
+
+const Paging = {
+    /**
+     * 페이징 요소 변경
+     * @param info 파라미터 {selector, has, cursor}
+     */
+    changePagingEl(info:{selector: string, has:boolean, cursor:string}){
+        const has = info.has
+        const element = document.querySelector(info.selector)
+        if(has){
+            // console.log(`${info.selector} has`)
+            element?.closest('.page-item')?.classList.remove('disabled')
+            element?.setAttribute("data-value", info.cursor)
+        } else {
+            element?.closest('.page-item')?.classList.add('disabled')
+        }
+    },
+
+    getCursorValue(selector: string){
+        let element = document.querySelector(selector) 
+        return element?.getAttribute("data-value")
     }
 }
 
