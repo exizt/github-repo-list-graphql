@@ -29,7 +29,7 @@ export async function fetchMyRepoList(authToken: string, callback: (arg0: any) =
 export async function fetchRepoList_GraphQL(
   authToken: string,
   query: string = 'github',
-  searchParam = { page: 10, after: "" },
+  searchParam: ISearchParams = { page: 10, after: null, before:null },
   callback: (arg0: any) => void
 ) {
   // https://github.com/octokit/core.js#readme
@@ -39,7 +39,7 @@ export async function fetchRepoList_GraphQL(
   })
 
   let after:string|null = null
-  if(searchParam.after.length > 0){
+  if(!!searchParam.after && (searchParam.after as string).length > 0){
     after = searchParam.after
   }
   const per_page = searchParam.page
@@ -88,4 +88,10 @@ export async function fetchRepoList_GraphQL(
     { "qry": query, "page": per_page, "after": after }
   )
     .then(callback)
+}
+
+interface ISearchParams {
+  page: number, 
+  after:string|null, 
+  before:string|null
 }

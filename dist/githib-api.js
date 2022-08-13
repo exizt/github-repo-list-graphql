@@ -11,13 +11,13 @@ export async function fetchMyRepoList(authToken, callback) {
         .then(response => response.data)
         .then(data => callback(data));
 }
-export async function fetchRepoList_GraphQL(authToken, query = 'github', searchParam = { page: 10, after: "" }, callback) {
+export async function fetchRepoList_GraphQL(authToken, query = 'github', searchParam = { page: 10, after: null, before: null }, callback) {
     const octokit = new Octokit({
         auth: authToken,
         baseUrl: 'https://api.github.com'
     });
     let after = null;
-    if (searchParam.after.length > 0) {
+    if (!!searchParam.after && searchParam.after.length > 0) {
         after = searchParam.after;
     }
     const per_page = searchParam.page;
