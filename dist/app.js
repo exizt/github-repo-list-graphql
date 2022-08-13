@@ -1,8 +1,8 @@
 import { loadConfig } from "./load-config.js";
 import { fetchRepoList_GraphQL } from "./github-api.js";
 import { AsyncGuard } from "./async-guard.js";
-import { OptionEventBind } from "./option-event-bind.js";
-const optionSet = {
+import { bindEventAll } from "./option-event-bind.js";
+const optionSelectors = {
     'searchText': '#search',
     'isPublic': '#is_public',
     'isPrivate': '#is_private',
@@ -14,7 +14,6 @@ const optionSet = {
     'nextPage': '#page_next',
     'previousPage': '#page_previous'
 };
-const optionElement = new OptionEventBind(optionSet);
 let searchAsyncGuard = new AsyncGuard();
 document.addEventListener("DOMContentLoaded", () => {
     main();
@@ -24,11 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error(err.message);
         });
         search(config, searchAsyncGuard.get());
-        _add_change_event(optionSet.onlyArchived, e => {
-            (getInputElementBySelector(optionSet.excludeArchived)).checked = false;
+        _add_change_event(optionSelectors.onlyArchived, e => {
+            (getInputElementBySelector(optionSelectors.excludeArchived)).checked = false;
         });
-        _add_change_event(optionSet.excludeArchived, e => {
-            (getInputElementBySelector(optionSet.onlyArchived)).checked = false;
+        _add_change_event(optionSelectors.excludeArchived, e => {
+            (getInputElementBySelector(optionSelectors.onlyArchived)).checked = false;
         });
         let sortOptions = document.querySelectorAll('a[name="sortOption"]');
         sortOptions.forEach(el => {
@@ -55,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         });
-        optionElement.bindEventAll((e) => {
+        bindEventAll(optionSelectors, (e) => {
             e.preventDefault();
             searchAsyncGuard.new();
             search(config, searchAsyncGuard.get(), e.target);
@@ -78,27 +77,27 @@ function search(config, asyncToken = 0, evTarget = null) {
         'sort': 'updated-desc'
     };
     let query = '';
-    const searchText = getInputElementBySelector(optionSet.searchText).value;
+    const searchText = getInputElementBySelector(optionSelectors.searchText).value;
     if (searchText) {
         query = `${searchText} in:name`;
     }
-    const isPublic = getInputElementBySelector(optionSet.isPublic).checked;
-    const isPrivate = getInputElementBySelector(optionSet.isPrivate).checked;
+    const isPublic = getInputElementBySelector(optionSelectors.isPublic).checked;
+    const isPrivate = getInputElementBySelector(optionSelectors.isPrivate).checked;
     if (isPrivate === false && isPublic === true) {
         searches['is'] = 'public';
     }
     else if (isPrivate === true && isPublic === false) {
         searches['is'] = 'private';
     }
-    let onlyArchived = getInputElementBySelector(optionSet.onlyArchived).checked;
+    let onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked;
     if (onlyArchived === true) {
         searches['archived'] = 'true';
     }
-    let excludeArchived = getInputElementBySelector(optionSet.excludeArchived).checked;
+    let excludeArchived = getInputElementBySelector(optionSelectors.excludeArchived).checked;
     if (excludeArchived === true) {
         searches['archived'] = 'false';
     }
-    let sortOption = getElementBySelector(optionSet.sortOption).value;
+    let sortOption = getElementBySelector(optionSelectors.sortOption).value;
     if (sortOption === 'nameAsc') {
         searches['sort'] = 'name-asc';
     }
@@ -127,10 +126,10 @@ function search(config, asyncToken = 0, evTarget = null) {
     const searchParam = { page: pageOption, after: "", before: "" };
     if (!!evTarget) {
         if (evTarget.id == 'page_next') {
-            searchParam.after = (Paging.getCursorValue(optionSet.nextPage)) ?? '';
+            searchParam.after = (Paging.getCursorValue(optionSelectors.nextPage)) ?? '';
         }
         if (evTarget.id == 'page_previous') {
-            searchParam.before = (Paging.getCursorValue(optionSet.previousPage)) ?? '';
+            searchParam.before = (Paging.getCursorValue(optionSelectors.previousPage)) ?? '';
         }
     }
     if (!searchAsyncGuard.check(asyncToken))
@@ -198,8 +197,8 @@ function rewriteHTML_GraphQL_2(_data, asyncToken = 0) {
     }
     let hasNextPage = pageInfo.hasNextPage;
     let hasPreviousPage = pageInfo.hasPreviousPage;
-    Paging.changePagingEl({ selector: optionSet.nextPage, has: hasNextPage, cursor: pageInfo.endCursor });
-    Paging.changePagingEl({ selector: optionSet.previousPage, has: hasPreviousPage, cursor: pageInfo.startCursor });
+    Paging.changePagingEl({ selector: optionSelectors.nextPage, has: hasNextPage, cursor: pageInfo.endCursor });
+    Paging.changePagingEl({ selector: optionSelectors.previousPage, has: hasPreviousPage, cursor: pageInfo.startCursor });
 }
 const Paging = {
     changePagingEl(info) {

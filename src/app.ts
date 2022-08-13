@@ -1,10 +1,10 @@
 import { loadConfig } from "./load-config.js"
 import { fetchRepoList_GraphQL } from "./github-api.js"
 import { AsyncGuard } from "./async-guard.js"
-import { OptionEventBind } from "./option-event-bind.js"
+import { bindEventAll } from "./option-event-bind.js"
 
 
-const optionSet = {
+const optionSelectors = {
     'searchText' : '#search',
     'isPublic' : '#is_public',
     'isPrivate' : '#is_private',
@@ -16,7 +16,6 @@ const optionSet = {
     'nextPage': '#page_next',
     'previousPage': '#page_previous'
 }
-const optionElement = new OptionEventBind(optionSet)
 let searchAsyncGuard = new AsyncGuard()
 
 document.addEventListener("DOMContentLoaded", ()=> {
@@ -32,11 +31,11 @@ document.addEventListener("DOMContentLoaded", ()=> {
         
         /* 엘리먼트 핸들링 관련 */
         // archived 관련 옵션
-        _add_change_event(optionSet.onlyArchived, e => {
-            (getInputElementBySelector(optionSet.excludeArchived)).checked = false
+        _add_change_event(optionSelectors.onlyArchived, e => {
+            (getInputElementBySelector(optionSelectors.excludeArchived)).checked = false
         })
-        _add_change_event(optionSet.excludeArchived, e => {
-            (getInputElementBySelector(optionSet.onlyArchived)).checked = false
+        _add_change_event(optionSelectors.excludeArchived, e => {
+            (getInputElementBySelector(optionSelectors.onlyArchived)).checked = false
         })
         // 정렬 옵션
         let sortOptions = document.querySelectorAll('a[name="sortOption"]')
@@ -67,7 +66,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
 
 
         /* 옵션과 관련된 엘리먼트들에 search를 호출하는 이벤트 바인딩 */
-        optionElement.bindEventAll((e)=>{
+        bindEventAll(optionSelectors, (e)=>{
             e.preventDefault() // 링크 등의 이벤트 방지
             searchAsyncGuard.new() // 중복 실행 방지
 
@@ -118,14 +117,14 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
 
     /* 검색 옵션 */
     // 검색어 옵션
-    const searchText = getInputElementBySelector(optionSet.searchText).value
+    const searchText = getInputElementBySelector(optionSelectors.searchText).value
     if(searchText){
         query = `${searchText} in:name`
     }
 
     // pubilc, private 검색 옵션
-    const isPublic = getInputElementBySelector(optionSet.isPublic).checked
-    const isPrivate = getInputElementBySelector(optionSet.isPrivate).checked
+    const isPublic = getInputElementBySelector(optionSelectors.isPublic).checked
+    const isPrivate = getInputElementBySelector(optionSelectors.isPrivate).checked
     if(isPrivate===false && isPublic===true){
         searches['is'] = 'public'
     } else if(isPrivate===true && isPublic===false){
@@ -134,18 +133,18 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
 
     // archived 검색 옵션
     // only archived
-    let onlyArchived = getInputElementBySelector(optionSet.onlyArchived).checked
+    let onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked
     if(onlyArchived === true){
         searches['archived'] = 'true'
     }
     // exclude archived
-    let excludeArchived = getInputElementBySelector(optionSet.excludeArchived).checked
+    let excludeArchived = getInputElementBySelector(optionSelectors.excludeArchived).checked
     if(excludeArchived === true){
         searches['archived'] = 'false'
     }
 
     // 정렬 순서 옵션
-    let sortOption = (getElementBySelector(optionSet.sortOption) as HTMLInputElement).value
+    let sortOption = (getElementBySelector(optionSelectors.sortOption) as HTMLInputElement).value
     if(sortOption === 'nameAsc'){
         searches['sort'] = 'name-asc'
     } else if(sortOption === 'lastUpdate'){
@@ -174,11 +173,11 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     const searchParam = { page: pageOption, after: "", before: ""}
     if(!!evTarget){
         if((evTarget as HTMLElement).id == 'page_next'){
-            searchParam.after = (Paging.getCursorValue(optionSet.nextPage)) ?? ''
+            searchParam.after = (Paging.getCursorValue(optionSelectors.nextPage)) ?? ''
         }
 
         if((evTarget as HTMLElement).id == 'page_previous'){
-            searchParam.before = (Paging.getCursorValue(optionSet.previousPage)) ?? ''
+            searchParam.before = (Paging.getCursorValue(optionSelectors.previousPage)) ?? ''
         }
     }
     
@@ -263,8 +262,8 @@ function rewriteHTML_GraphQL_2(_data:any, asyncToken = 0){
     // console.log(pageInfo)
     let hasNextPage = pageInfo.hasNextPage
     let hasPreviousPage = pageInfo.hasPreviousPage
-    Paging.changePagingEl({selector:optionSet.nextPage, has:hasNextPage, cursor:pageInfo.endCursor})
-    Paging.changePagingEl({selector:optionSet.previousPage, has:hasPreviousPage, cursor:pageInfo.startCursor})
+    Paging.changePagingEl({selector:optionSelectors.nextPage, has:hasNextPage, cursor:pageInfo.endCursor})
+    Paging.changePagingEl({selector:optionSelectors.previousPage, has:hasPreviousPage, cursor:pageInfo.startCursor})
 }
 
 
