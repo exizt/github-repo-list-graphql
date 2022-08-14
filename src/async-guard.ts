@@ -6,7 +6,7 @@ export class AsyncGuard {
     token = 0
 
     newToken() {
-        let newToken = Date.now()
+        const newToken = Date.now()
 
         // token 중복 방지 (필요한지는..혹시 모르니..)
         this.token = (this.token == newToken) ? newToken * 10 : newToken

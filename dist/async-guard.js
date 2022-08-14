@@ -1,7 +1,7 @@
 export class AsyncGuard {
     token = 0;
     newToken() {
-        let newToken = Date.now();
+        const newToken = Date.now();
         this.token = (this.token == newToken) ? newToken * 10 : newToken;
     }
     new = () => this.newToken();

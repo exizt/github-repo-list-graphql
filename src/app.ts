@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sortOptions.forEach(el => {
             el?.addEventListener("click", e => {
                 e.preventDefault()
-                let v = (e.target as HTMLAnchorElement).getAttribute("data-value")
+                const v = (e.target as HTMLAnchorElement).getAttribute("data-value")
                 const sort_option = document.querySelector("#sort_option") as HTMLInputElement
                 if (sort_option !== null && v !== null) {
                     sort_option.value = v
@@ -54,8 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
         viewOptions.forEach(el => {
             el?.addEventListener("change", e => {
                 e.preventDefault()
-                let v = (e.target as HTMLInputElement).value
-                let output = document.querySelector(".gr-output")
+                const v = (e.target as HTMLInputElement).value
+                const output = document.querySelector(".gr-output")
                 if (v == 'simple') {
                     output?.classList.add("gr-output-simple")
                 } else {
@@ -168,12 +168,12 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
 function rewriteHTML(_data: any, asyncToken = 0): void {
     let outputHtml = ''
 
-    let data = _data.search
-    let itemList = data.edges
-    let pageInfo = data.pageInfo
+    const data = _data.search
+    const itemList = data.edges
+    const pageInfo = data.pageInfo
 
     // for loop
-    for (let _item of itemList) {
+    for (const _item of itemList) {
         const item = _item.node
 
         // const updated_at = new Date(item.pushedAt).toLocaleString('ko-KR')
@@ -185,21 +185,18 @@ function rewriteHTML(_data: any, asyncToken = 0): void {
             badges += '<span class="badge rounded-pill text-bg-secondary">archived</span>'
         }
 
+        // 라이선스 종류
         const licenseInfoHtml = (item.licenseInfo && item.licenseInfo.name) ?
             `<span class="ml-0 mr-3">${item.licenseInfo.name}</span> /` : ''
 
+        // 설명글
         const descriptionHtml = (item.description) ? `<small class="grot-item-desc">${item.description}</small>` : ''
         
+        // 용량
+        const diskUsage = (item.diskUsage > 1024) ?  (item.diskUsage * 1.0 / 1024).toFixed(2) + ' MB' : item.diskUsage + ' KB'
+        const diskUsageHtml = (diskUsage.length > 0) ? `<span class="ml-0 mr-3">${diskUsage}</span> /` : ''
 
-        const diskUsage:string
-        if (item.diskUsage > 1024) {
-            diskUsage = (item.diskUsage * 1.0 / 1024).toFixed(2) + ' MB'
-        } else {
-            diskUsage = item.diskUsage + ' KB'
-        }
-        const diskUsageHtml = `<span class="ml-0 mr-3">${diskUsage}</span> /`
-
-
+        // html 작성
         const html = `
         <div class="gr-output-item">
         <div>
