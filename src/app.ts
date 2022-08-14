@@ -16,7 +16,7 @@ const optionSelectors = {
     'nextPage': '#page_next',
     'previousPage': '#page_previous'
 }
-let searchAsyncGuard = new AsyncGuard()
+const searchAsyncGuard = new AsyncGuard()
 
 document.addEventListener("DOMContentLoaded", () => {
     main()
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error(err.message)
         })
 
-        search(config, searchAsyncGuard.get())
+        search(config)
 
         /* 엘리먼트 핸들링 관련 */
         // archived 관련 옵션
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
             (getInputElementBySelector(optionSelectors.onlyArchived)).checked = false
         })
         // 정렬 옵션
-        let sortOptions = document.querySelectorAll('a[name="sortOption"]')
+        const sortOptions = document.querySelectorAll('a[name="sortOption"]')
         sortOptions.forEach(el => {
             el?.addEventListener("click", e => {
                 e.preventDefault()
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         })
         // 보기 옵션
-        let viewOptions = document.querySelectorAll('input[name="viewOptions"]')
+        const viewOptions = document.querySelectorAll('input[name="viewOptions"]')
         viewOptions.forEach(el => {
             el?.addEventListener("change", e => {
                 e.preventDefault()
@@ -112,18 +112,18 @@ function search(config: { personal_access_token: any; author: string; }, asyncTo
     }
     // archived 검색 옵션
     // only archived
-    let onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked
+    const onlyArchived = getInputElementBySelector(optionSelectors.onlyArchived).checked
     if (onlyArchived === true) {
         searches['archived'] = 'true'
     }
     // exclude archived
-    let excludeArchived = getInputElementBySelector(optionSelectors.excludeArchived).checked
+    const excludeArchived = getInputElementBySelector(optionSelectors.excludeArchived).checked
     if (excludeArchived === true) {
         searches['archived'] = 'false'
     }
 
     /* ---------- 정렬 옵션 --------- */
-    let sortOption = (getElementBySelector(optionSelectors.sortOption) as HTMLInputElement).value
+    const sortOption = (getElementBySelector(optionSelectors.sortOption) as HTMLInputElement).value
     if (sortOption === 'nameAsc') {
         searches['sort'] = 'name-asc'
     } else if (sortOption === 'lastUpdate') {
@@ -174,7 +174,7 @@ function rewriteHTML(_data: any, asyncToken = 0): void {
 
     // for loop
     for (let _item of itemList) {
-        let item = _item.node
+        const item = _item.node
 
         // const updated_at = new Date(item.pushedAt).toLocaleString('ko-KR')
         let badges = ''
@@ -185,23 +185,19 @@ function rewriteHTML(_data: any, asyncToken = 0): void {
             badges += '<span class="badge rounded-pill text-bg-secondary">archived</span>'
         }
 
-        let licenseInfoHtml = ''
-        if (item.licenseInfo && item.licenseInfo.name) {
-            licenseInfoHtml = `<span class="ml-0 mr-3">${item.licenseInfo.name}</span> /`
-        }
+        const licenseInfoHtml = (item.licenseInfo && item.licenseInfo.name) ?
+            `<span class="ml-0 mr-3">${item.licenseInfo.name}</span> /` : ''
 
-        let descriptionHtml = ''
-        if (item.description) {
-            descriptionHtml = `<small class="grot-item-desc">${item.description}</small>`
-        }
+        const descriptionHtml = (item.description) ? `<small class="grot-item-desc">${item.description}</small>` : ''
+        
 
-        let diskUsage = ''
+        const diskUsage:string
         if (item.diskUsage > 1024) {
             diskUsage = (item.diskUsage * 1.0 / 1024).toFixed(2) + ' MB'
         } else {
             diskUsage = item.diskUsage + ' KB'
         }
-        let diskUsageHtml = `<span class="ml-0 mr-3">${diskUsage}</span> /`
+        const diskUsageHtml = `<span class="ml-0 mr-3">${diskUsage}</span> /`
 
 
         const html = `
@@ -233,8 +229,8 @@ function rewriteHTML(_data: any, asyncToken = 0): void {
 
     // 페이징 준비
     // console.log(pageInfo)
-    let hasNextPage = pageInfo.hasNextPage
-    let hasPreviousPage = pageInfo.hasPreviousPage
+    const hasNextPage = pageInfo.hasNextPage
+    const hasPreviousPage = pageInfo.hasPreviousPage
     Paging.changePagingEl({ selector: optionSelectors.nextPage, has: hasNextPage, cursor: pageInfo.endCursor })
     Paging.changePagingEl({ selector: optionSelectors.previousPage, has: hasPreviousPage, cursor: pageInfo.startCursor })
 }
@@ -259,7 +255,7 @@ const Paging = {
     },
 
     getCursorValue(selector: string) {
-        let element = document.querySelector(selector)
+        const element = document.querySelector(selector)
         return element?.getAttribute("data-value")
     }
 }
