@@ -23,7 +23,7 @@ export async function fetchRepoList_GraphQL(
   }
   const per_page = searchParam.page
 
-  let graphQuery = `
+  const graphQuery = `
   query Qr($qry: String = "", $page:Int=10, $after:String=null) {
     search(type: REPOSITORY, first: $page, query: $qry, after:$after) {
       pageInfo {
