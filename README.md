@@ -1,6 +1,5 @@
 # Github repo list (graphql)
-
-자신의 깃헙 저장소 목록을 조회하는 기능의 js
+: 자신의 깃헙 저장소 목록을 조회하는 기능
 
 # 사용법
 ## 셋팅
@@ -8,14 +7,19 @@
 2. `personal_access_token`을 발행해서 입력해주고, `author`에는 자신의 아이디를 입력
 3. `index.html`을 실행하면 목록을 조회해 볼 수 있음.
 
-## 다른 곳에서 사용시
 
-(핵심 코드)
-```javascript
-let authToken = ''
-let query = 'user:username sort:name-asc'
-let searchParam = { page: 10, after: "", before: ""}
+## 다른 곳에서 코드를 재사용시
 
+: `typscript` 코드 예시. 핵심적인 구문.
+
+```typescript
+import { fetchRepoList_GraphQL } from "./src/github-api.js"
+
+const authToken = ''
+const author = ''
+
+const query = `user:${author} sort:name-asc`
+const searchParam = { page: 10, after: "", before: ""}
 fetchRepoList_GraphQL(authToken, query, searchParam, (data:any)=>{
     let data = _data.search
     let itemList = data.edges
@@ -33,3 +37,5 @@ github에 로그인해서 저장소 목록을 보는 기능과 거의 비슷하�
 
 
 
+# 사용된 라이브러리
+- octokit : 인터넷을 통한 사용. `src/github-api.ts`에서 `import { Octokit } from "https://cdn.skypack.dev/@octokit/core";`

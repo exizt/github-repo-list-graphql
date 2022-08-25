@@ -1,2 +1,6 @@
-package-lock.json binary
-* text=auto eol=lf
+# autocrlf
+* text=auto
+
+# Don't diff
+package-lock.json text -diff
+
