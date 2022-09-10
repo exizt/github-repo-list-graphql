@@ -3,12 +3,5 @@
 		{
 			"path": "."
 		}
-	],
-	"settings": {
-		"search.exclude": {
-			"**/*.code-workspace": true,
-			"**/LICENSE": true,
-			"**/package-lock.json": true
-		}
-	}
+	]
 }
