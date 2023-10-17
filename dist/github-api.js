@@ -1,4 +1,4 @@
-import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
+import { Octokit } from "https://esm.sh/@octokit/core";
 export async function fetchRepoList_GraphQL(authToken, query = 'github', searchParam = { page: 10, after: null, before: null }, callback) {
     const octokit = new Octokit({
         auth: authToken,
