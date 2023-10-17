@@ -5,6 +5,8 @@
 ## 셋팅
 1. `config.sample.json`을 복사해서 `config.json`파일을 생성
 2. `personal_access_token`을 발행해서 입력해주고, `author`에는 자신의 아이디를 입력
+    - Github 접속 > Settings > Developer settings > Personal access tokens > Tokens(classic)
+    - `repo` 권한 체크 후 토큰 발행
 3. `index.html`을 실행하면 목록을 조회해 볼 수 있음.
 
 
