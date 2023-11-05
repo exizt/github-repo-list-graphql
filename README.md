@@ -12,7 +12,7 @@
 
 ## 다른 곳에서 코드를 재사용시
 
-> `typscript` 코드 예시. 핵심적인 구문.
+> `typescript` 코드 예시. 핵심적인 구문.
 
 ```typescript
 import { fetchRepoList_GraphQL } from "./src/github-api.js"

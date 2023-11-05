@@ -28,18 +28,19 @@
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" value="" id="only_archived" name="archived">
           <label class="form-check-label" for="only_archived">
-            onlyArchived
+            Archived
           </label>
         </div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" value="" id="exclude_archived" name="archived">
           <label class="form-check-label" for="exclude_archived">
-            excludeArchived
+            Exclude archived
           </label>
         </div>
       </div>
       <div class="float-end">
         <div class="">
+          <!-- sorting options -->
           <div class="btn-group">
             <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               정렬
@@ -50,12 +51,19 @@
             </ul>
             <input type="hidden" id="sort_option" value="">
           </div>
+          <!-- view options -->
           <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
-            <input type="radio" class="btn-check" name="viewOptions" value="default" id="vbtn-radio1" autocomplete="off" checked>
+            <!-- all -->
+            <input type="radio" class="btn-check" name="viewOptions" value="all" id="vbtn-radio1" autocomplete="off" checked>
             <label class="btn btn-outline-secondary" for="vbtn-radio1">Default</label>
-            <input type="radio" class="btn-check" name="viewOptions" value="simple" id="vbtn-radio2" autocomplete="off">
-            <label class="btn btn-outline-secondary" for="vbtn-radio2">Simple</label>
+            <!-- -->
+            <input type="radio" class="btn-check" name="viewOptions" value="hidden_i" id="vbtn-radio2" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="vbtn-radio2">title+desc</label>
+            <!-- -->
+            <input type="radio" class="btn-check" name="viewOptions" value="hidden_di" id="vbtn-radio3" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="vbtn-radio3">title</label>
           </div>
+          <!-- limit options -->
           <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
             <input type="radio" class="btn-check" name="pageOptions" value="10" id="btn_page_option_10" autocomplete="off" checked>
             <label class="btn btn-outline-secondary" for="btn_page_option_10">10</label>

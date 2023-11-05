@@ -1,6 +1,6 @@
-.gr-output.gr-output-simple .grot-item-desc{
+.gr-output.gr-output-hidden-desc .grot-item-desc{
     display: none;
 }
-.gr-output.gr-output-simple .grot-item-info{
+.gr-output.gr-output-hidden-info .grot-item-info{
     display: none;
 }

@@ -56,10 +56,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault()
                 const v = (e.target as HTMLInputElement).value
                 const output = document.querySelector(".gr-output")
-                if (v == 'simple') {
-                    output?.classList.add("gr-output-simple")
+                // css class name
+                const cn_hidden_i = "gr-output-hidden-info"
+                const cn_hidden_d = "gr-output-hidden-desc"
+                console.log("ddd")
+                if (v == 'hidden_i') {
+                    output?.classList.add(cn_hidden_i)
+                    output?.classList.remove(cn_hidden_d)
+                } else if(v == 'hidden_di') {
+                    output?.classList.add(cn_hidden_i)
+                    output?.classList.add(cn_hidden_d)
                 } else {
-                    output?.classList.remove("gr-output-simple")
+                    output?.classList.remove(cn_hidden_i)
+                    output?.classList.remove(cn_hidden_d)
                 }
             })
         })
